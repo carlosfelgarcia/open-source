@@ -76,17 +76,28 @@ class UI_Text_Btn(qg.QDialog):
         txt_field.setValidator(validator)
         text_layout.addWidget(txt_field)
         
-        txt_editor = qg.QTextEdit()
-        txt_editor.setWordWrapMode(qg.QTextOption.WordWrap)
-        text_layout.addWidget(txt_editor)
+        self.txt_editor = qg.QTextEdit()
+        self.txt_editor.setWordWrapMode(qg.QTextOption.ManualWrap)
+        text_layout.addWidget(self.txt_editor)
         
         btn_layout = qg.QHBoxLayout()
         btn_layout.setSpacing(5)
+        
+        btn_ex = qg.QPushButton("Button")
+        btn_layout.addWidget(btn_ex)
         
         radio_btn_a = qg.QRadioButton('a')
         radio_btn_b = qg.QRadioButton('b')
         radio_btn_c = qg.QRadioButton('c')
         radio_btn_d = qg.QRadioButton('d')
+        
+        btn_group_1 = qg.QButtonGroup(self)
+        btn_group_2 = qg.QButtonGroup(self)
+        
+        btn_group_1.addButton(radio_btn_a)
+        btn_group_1.addButton(radio_btn_b)
+        btn_group_2.addButton(radio_btn_c)
+        btn_group_2.addButton(radio_btn_d)
         
         btn_layout.addWidget(radio_btn_a)
         btn_layout.addWidget(radio_btn_b)
@@ -96,23 +107,30 @@ class UI_Text_Btn(qg.QDialog):
         btn_check = qg.QCheckBox("check")
         btn_layout.addWidget(btn_check)
         
-        btn_layout2 = qg.QHBoxLayout()
-        btn_layout2.setSpacing(5)
+        slide_layout = qg.QHBoxLayout()
+        slide_layout.setSpacing(5)
         
-#         radio_btn2_a = qg.QRadioButton('a')
-#         radio_btn2_b = qg.QRadioButton('b')
-#         radio_btn2_c = qg.QRadioButton('c')
-#         radio_btn2_d = qg.QRadioButton('d')
-#         
-#         btn_layout2.addWidget(radio_btn2_a)
-#         btn_layout2.addWidget(radio_btn2_b)
-#         btn_layout2.addWidget(radio_btn2_c)
-#         btn_layout2.addWidget(radio_btn2_d)
-
+        slide = qg.QSlider()
+        slide.setOrientation(qc.Qt.Horizontal)
+        slide_count = qg.QSpinBox()
+        
+        slide_layout.addWidget(slide)
+        slide_layout.addWidget(slide_count)
+        
         self.layout().addLayout(text_layout)
         self.layout().addLayout(btn_layout)
-        #self.layout().addLayout(btn_layout2)
+        self.layout().addLayout(slide_layout)
         
+        slide.valueChanged.connect(slide_count.setValue)
+        slide_count.valueChanged.connect(slide.setValue)
+        
+        btn_group_1.buttonClicked.connect(self.add_text)
+        
+    def add_text(self, button):
+        self.txt_editor.setPlainText(self.txt_editor.toPlainText() +
+                                     button.text())
+
+
 def run():
     app = qg.QApplication(sys.argv)
     dialog = UI_Text_Btn()

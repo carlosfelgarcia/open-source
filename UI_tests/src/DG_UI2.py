@@ -7,7 +7,14 @@ Created on Sep 2, 2016
 
 import PyQt4.QtGui as qg
 import PyQt4.QtCore as qc
+
 import sys
+
+from customUI.button import DT_Button, DT_ButtonThin, DT_CloseButton
+from customUI.checkbox import DT_Checkbox
+from customUI.label import DT_Label
+from customUI.line_edit import DT_LineEdit
+from customUI.slider import DT_Slider
 
 
 # ----------------------------- UI ---------------------------------------
@@ -15,7 +22,10 @@ class MainWindow(qg.QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
         self.setGeometry(100, 100, 800, 600)
-        
+        # Read Style sheet
+        style_sheet_file = qc.QFile('scheme.qss')
+        style_sheet_file.open(qc.QFile.ReadOnly)
+        self.setStyleSheet(qc.QLatin1String(style_sheet_file.readAll()))
 
 
 class MainDialog(qg.QDialog):
@@ -25,7 +35,7 @@ class MainDialog(qg.QDialog):
         self.setWindowFlags(qc.Qt.WindowStaysOnTopHint)
         self.setObjectName('InterpolateIt')
         self.setWindowTitle('Interpolate It')
-        self.setFixedWidth(340)
+        self.setFixedWidth(314)
         
         self.setLayout(qg.QVBoxLayout())
         self.layout().setContentsMargins(0, 0, 0, 0)
@@ -53,7 +63,7 @@ class MainDialog(qg.QDialog):
         button_layout = qg.QHBoxLayout()
         button_layout.setContentsMargins(0, 0, 0, 0)
         button_layout.setAlignment(qc.Qt.AlignRight)
-        new_btn = qg.QPushButton('New...')
+        new_btn = DT_Button('New...')
         button_layout.addWidget(new_btn)
         main_layout.addLayout(button_layout)
         
@@ -89,62 +99,95 @@ class MainDialog(qg.QDialog):
 class InterpolateItWidget(qg.QFrame):
     def __init__(self):
         qg.QFrame.__init__(self)
-        self.setFixedHeight(150)
+        self.setFrameStyle(qg.QFrame.Panel | qg.QFrame.Raised)
         
         self.setLayout(qg.QVBoxLayout())
         self.layout().setAlignment(qc.Qt.AlignTop)
-        self.layout().setContentsMargins(5, 5, 5, 5)
-        self.layout().setSpacing(5)
+        self.layout().setContentsMargins(3, 1, 3, 3)
+        self.layout().setSpacing(0)
+        self.setFixedHeight(150)
+        
+        main_widget = qg.QWidget()
+        main_widget.setLayout(qg.QVBoxLayout())
+        main_widget.layout().setContentsMargins(2, 2, 2, 2)
+        main_widget.layout().setSpacing(5)
+        main_widget.setFixedHeight(140)
+        main_widget.setFixedWidth(290)
+        
+        graphics_scene = qg.QGraphicsScene()
+        graphics_view = qg.QGraphicsView()
+        graphics_view.setScene(graphics_scene)
+        graphics_view.setHorizontalScrollBarPolicy(qc.Qt.ScrollBarAlwaysOff)
+        graphics_view.setVerticalScrollBarPolicy(qc.Qt.ScrollBarAlwaysOff)
+        graphics_view.setFocusPolicy(qc.Qt.NoFocus)
+        graphics_view.setSizePolicy(qg.QSizePolicy.Minimum,
+                                    qg.QSizePolicy.Minimum)
+        graphics_view.setStyleSheet("QGraphicsView {border-style: none;}")
+        self.layout().addWidget(graphics_view)
+        self.main_widget_proxy = graphics_scene.addWidget(main_widget)
+        main_widget.setParent(graphics_view)
         
         title_layout = qg.QHBoxLayout()
-        title_txt = qg.QLineEdit('Untitled')
-        self.exit_btn = qg.QPushButton('X')
-        self.exit_btn.setFixedWidth(40)
+        title_txt = DT_LineEdit()
+        title_txt.setPlaceholderMessage('Untitled')
+        self.exit_btn = DT_CloseButton('X')
+        self.exit_btn.setObjectName('roundedButton')
         title_layout.addWidget(title_txt)
         title_layout.addWidget(self.exit_btn)
-        self.layout().addLayout(title_layout)
+        main_widget.layout().addLayout(title_layout)
         
         buttons_1_layout = qg.QHBoxLayout()
-        self.store_btn = qg.QPushButton('Store Items')
-        self.clean_btn = qg.QPushButton('Clear Items')
-        buttons_1_layout.addSpacerItem(qg.QSpacerItem(5, 5, qg.QSizePolicy.Expanding))
+        self.store_btn = DT_Button('Store Items')
+        self.clean_btn = DT_Button('Clear Items')
+        buttons_1_layout.addSpacerItem(qg.QSpacerItem(5, 5,
+                                                      qg.QSizePolicy.Expanding))
         buttons_1_layout.addWidget(self.store_btn)
         buttons_1_layout.addWidget(self.clean_btn)
-        buttons_1_layout.addSpacerItem(qg.QSpacerItem(5, 5, qg.QSizePolicy.Expanding))
-        self.layout().addLayout(buttons_1_layout)
+        buttons_1_layout.addSpacerItem(qg.QSpacerItem(5, 5,
+                                                      qg.QSizePolicy.Expanding))
+        main_widget.layout().addLayout(buttons_1_layout)
         
         buttons_2_layout = qg.QHBoxLayout()
-        self.start_btn = qg.QPushButton('Store Start')
-        self.reset_btn = qg.QPushButton('Reset')
-        self.end_btn = qg.QPushButton('Store Ends')
+        self.start_btn = DT_ButtonThin('Store Start')
+        self.reset_btn = DT_ButtonThin('Reset')
+        self.end_btn = DT_ButtonThin('Store Ends')
         buttons_2_layout.addWidget(self.start_btn)
         buttons_2_layout.addWidget(self.reset_btn)
         buttons_2_layout.addWidget(self.end_btn)
-        self.layout().addLayout(buttons_2_layout)
+        main_widget.layout().addLayout(buttons_2_layout)
         
         slider_layout = qg.QHBoxLayout()
-        self.slider_start_lb = qg.QLabel('Start')
-        self.slider = qg.QSlider(qc.Qt.Horizontal)
-        self.slider_end_lb = qg.QLabel('End')
+        self.slider_start_lb = DT_Label('Start')
+        self.slider = DT_Slider()
+        self.slider.setRange(0, 49)
+        self.slider.setOrientation(qc.Qt.Horizontal)
+        self.slider_end_lb = DT_Label('End')
         slider_layout.addWidget(self.slider_start_lb)
         slider_layout.addWidget(self.slider)
         slider_layout.addWidget(self.slider_end_lb)
-        self.layout().addLayout(slider_layout)
+        main_widget.layout().addLayout(slider_layout)
         
         check_layout = qg.QHBoxLayout()
-        self.trans_chk = qg.QCheckBox('Transform')
-        self.attrs_chk = qg.QCheckBox('UD Attributes')
+        self.trans_chk = DT_Checkbox('Transform')
+        self.attrs_chk = DT_Checkbox('UD Attributes')
         self.attrs_chk.setCheckState(qc.Qt.Checked)
         check_layout.addWidget(self.trans_chk)
-        check_layout.addSpacerItem(qg.QSpacerItem(5, 5, qg.QSizePolicy.Expanding))
+        check_layout.addSpacerItem(qg.QSpacerItem(5, 5,
+                                                  qg.QSizePolicy.Expanding))
         check_layout.addWidget(self.attrs_chk)
-        self.layout().addLayout(check_layout)
+        main_widget.layout().addLayout(check_layout)
         
+        # Connections
         self.exit_btn.clicked.connect(self.remove)
-        
         self.store_btn.clicked.connect(self.enable_btns)
-        
+        self.clean_btn.clicked.connect(self.clear_btns)
         self.set_btns(False)
+        self.slider.valueChanged.connect(self.change_glow)
+        
+    def change_glow(self, value):
+        glow_value = int(float(value) / self.slider.maximum() * 100)
+        self.slider_start_lb.setGlowValue(100 - glow_value)
+        self.slider_end_lb.setGlowValue(glow_value)
         
     def set_btns(self, value):
         self.reset_btn.setEnabled(value)
@@ -156,6 +199,10 @@ class InterpolateItWidget(qg.QFrame):
         self.slider_end_lb.setEnabled(value)
         self.trans_chk.setEnabled(value)
         self.attrs_chk.setEnabled(value)
+        
+    def clear_btns(self):
+        self.set_btns(False)
+        self.slider.setValue(0)
         
     def enable_btns(self):
         self.set_btns(True)
@@ -169,37 +216,63 @@ class InterpolateItWidget(qg.QFrame):
     def delete_widget(self):
         self.emit(qc.SIGNAL('DELETE'), self)
         
-    # ----------------------------- Animation ----------------------------------
+    # ----------------------------- Animation ---------------------------------
 
     def _animation_expand(self, value):
         size_animation = qc.QPropertyAnimation(self, 'geometry')
+        opacity_anim = qc.QPropertyAnimation(self.main_widget_proxy, 'opacity')
         
+        # Animation Opacity
+        opacity_anim.setStartValue(not(value))
+        opacity_anim.setEndValue(value)
+        opacity_anim.setDuration(200)
+        opacity_anim_curve = qc.QEasingCurve()
+        if value:
+            opacity_anim_curve.setType(qc.QEasingCurve.InQuad)
+        else:
+            opacity_anim_curve.setType(qc.QEasingCurve.OutQuad)
+        opacity_anim.setEasingCurve(opacity_anim_curve)
+        
+        # def size of the geometry
         geometry = self.geometry()
         width = geometry.width()
         x, y, _, _ = geometry.getCoords()
-        
         size_start = qc.QRect(x, y, width, int(not(value)) * 150)
         size_end = qc.QRect(x, y, width, int(value) * 150)
         
+        # Animation for geometry
         size_animation.setStartValue(size_start)
         size_animation.setEndValue(size_end)
         size_animation.setDuration(300)
-        
         anim_curve = qc.QEasingCurve()
         if value:
             anim_curve.setType(qc.QEasingCurve.InQuad)
         else:
             anim_curve.setType(qc.QEasingCurve.OutQuad)
-            
         size_animation.setEasingCurve(anim_curve)
         
+        # Animation sequence
+        self._animation = qc.QSequentialAnimationGroup()
+        
+        if value:
+            self.main_widget_proxy.setOpacity(0)
+            self._animation.addAnimation(size_animation)
+            self._animation.addAnimation(opacity_anim)
+            self._animation.finished.connect(self._animation.clear)
+        
+        else:
+            self.main_widget_proxy.setOpacity(1)
+            self._animation.addAnimation(opacity_anim)
+            self._animation.addAnimation(size_animation)
+            self._animation.finished.connect(self._animation.clear)
+            self._animation.finished.connect(self.delete_widget)
+        
         size_animation.valueChanged.connect(self._force_resize)
-        if not value:
-            size_animation.finished.connect(self.delete_widget)
+
+        self._animation.start(qc.QAbstractAnimation.DeleteWhenStopped)
         
-        self._animation = size_animation
-        size_animation.start(qc.QAbstractAnimation.DeleteWhenStopped)
-        
+    # --------------------------------- Methods ------------------------------
+    
     def _force_resize(self, new_height):
         self.setFixedHeight(new_height.toRect().height())
 

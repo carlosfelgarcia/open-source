@@ -73,7 +73,7 @@ class main_dialog(qg.QDialog):
     '''
     This is the main dialog
     '''
-    def __init__(self):
+    def __init__(self, table):
         qg.QDialog.__init__(self)
         
         self.setLayout(qg.QHBoxLayout())
@@ -93,26 +93,33 @@ class main_dialog(qg.QDialog):
         main_layout.setSpacing(2)
         
         # Info Layout
+        columns = sorted(table.keys())
+        num_columns = len(columns)
         info_layout = qg.QVBoxLayout()
-        info_layout.setContentsMargins(5, 30, 5, 5)
-        info_layout.setSpacing(30)
+        info_layout.setContentsMargins(5, 50, 5, 5)
+        info_layout.setSpacing(10 * num_columns)
         info_layout.setAlignment(qc.Qt.AlignTop)
         
-        label_col1 = qg.QLabel()
-        self._text_col1 = ''
-        label_col1.setText('Column 1: %s' % self._text_col1)
+        # Font
+        font = qg.QFont()
+        font.setBold(True)
+        font.setCapitalization(qg.QFont.Capitalize)
+        font.setPixelSize(16)
+
+        self.columns_labels = []
         
-        label_col2 = qg.QLabel()
-        self._text_col2 = ''
-        label_col2.setText('Column 2: %s' % self._text_col2)
+        for col in columns:
+            label_col = qg.QLabel()
+            label_col.setFont(font)
+            self.columns_labels.append(label_col)
+            label_col.setText(col)
+            info_layout.addWidget(label_col)
         
-        label_col3 = qg.QLabel()
-        self._text_col3 = ''
-        label_col3.setText('Column 3: %s' % self._text_col3)
-        
-        info_layout.addWidget(label_col1)
-        info_layout.addWidget(label_col2)
-        info_layout.addWidget(label_col3)
+        # Just for testing
+        counter = 0
+        for col in self.columns_labels:
+            col.setText(str(counter))
+            counter += 1
         # Button_layout
         
         # Table Layout
@@ -128,10 +135,13 @@ class main_dialog(qg.QDialog):
     
 
 def run():
+    # Test data
+    table = {'Column 1': 'ABC', 'Column 2': 'DEF', 'Column 3': 'GHI'}
+    
     app = qg.QApplication(sys.argv)
     
     main_ui = UI()
-    dialog = main_dialog()
+    dialog = main_dialog(table)
     main_ui.setCentralWidget(dialog)
     main_ui.show()
     sys.exit(app.exec_())

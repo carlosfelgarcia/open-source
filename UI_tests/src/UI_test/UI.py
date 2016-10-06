@@ -9,6 +9,10 @@ import PyQt4.QtGui as qg
 
 # Built-in imports
 import sys
+import collections
+
+# Constants
+TABLE_SIZE = 700
 
 
 class UI(qg.QMainWindow):
@@ -105,7 +109,8 @@ class main_dialog(qg.QDialog):
         font.setBold(True)
         font.setCapitalization(qg.QFont.Capitalize)
         font.setPixelSize(16)
-
+        
+        # Data Columns
         self.columns_labels = []
         
         for col in columns:
@@ -116,17 +121,52 @@ class main_dialog(qg.QDialog):
             info_layout.addWidget(label_col)
         
         # Just for testing
-        counter = 0
-        for col in self.columns_labels:
-            col.setText(str(counter))
-            counter += 1
+#         counter = 0
+#         for col in self.columns_labels:
+#             col.setText(str(counter))
+#             counter += 1
         # Button_layout
         
         # Table Layout
+        table_layout = qg.QHBoxLayout()
+        table_layout.setContentsMargins(5, 5, 5, 5)
+        table_layout.setAlignment(qc.Qt.AlignTop)
         
+        # Table widget
+        table_w = qg.QTableWidget()
+        pref_size = len(columns) * 106
+        resize = False
+        if pref_size < TABLE_SIZE:
+            table_w.setFixedWidth(pref_size)
+        else:
+            resize = True
+            table_w.setFixedWidth(TABLE_SIZE)
+        
+        # Add values to the table
+        for column in columns:
+            col_num = table_w.columnCount()
+            row_total_num = table_w.rowCount()
+            table_w.insertColumn(col_num)
+            
+            if isinstance(table[column], collections.Iterable):
+                for i in xrange(len(table[column])):
+                    table_item = qg.QTableWidgetItem(table[column][i])
+                    if i >= row_total_num:
+                        table_w.insertRow(i)
+                    table_w.setItem(i, col_num, table_item)
+            else:
+                table_w.insertRow(row_total_num)
+                table_item = qg.QTableWidgetItem(table[column])
+                table_w.setItem(row_total_num, col_num, table_item)
+        
+        if resize:
+            table_w.resizeColumnsToContents()
+            table_w.resizeRowsToContents()
+        table_layout.addWidget(table_w)
         
         # Added Main Layout
         main_layout.addLayout(info_layout)
+        main_layout.addLayout(table_layout)
         page1_widget.setLayout(main_layout)
         
         tab_widget.addTab(page1_widget, 'Tables')
@@ -136,7 +176,8 @@ class main_dialog(qg.QDialog):
 
 def run():
     # Test data
-    table = {'Column 1': 'ABC', 'Column 2': 'DEF', 'Column 3': 'GHI'}
+    table = {'Column 1': ['A', 'BY', 'C'], 'Column 2': ['DW', 'E', 'F'],
+             'Column 3': ['G', 'H', 'LI'], 'Column 4': ['G', 'H', 'LI']}
     
     app = qg.QApplication(sys.argv)
     

@@ -100,48 +100,69 @@ class main_dialog(qg.QDialog):
         # Main Layout
         main_layout = qg.QHBoxLayout()
         main_layout.setContentsMargins(5, 5, 5, 5)
-        main_layout.setSpacing(2)
+        main_layout.setSpacing(200)
         
-        # Parent Info widget
-        main_info_layout = qg.QVBoxLayout()
-        main_info_layout.setContentsMargins(5, 5, 5, 5)
-        main_info_layout.setSpacing(50)
+        # ---------------- Left UI --------------------------
+        main_left_layout = qg.QVBoxLayout()
+        main_left_layout.setContentsMargins(5, 5, 5, 5)
+        main_left_layout.setSpacing(50)
         
-        parent_info_widget = qg.QWidget()
-        info_layout = qg.QVBoxLayout()
-        parent_info_widget.setLayout(info_layout)
-        parent_info_widget.layout().setContentsMargins(0, 0, 0, 0)
-#         parent_info_widget.setSizePolicy(qg.QSizePolicy.Minimum,
-#                                          qg.QSizePolicy.Minimum)
+        add_col_widget = qg.QWidget()
+        add_col_widget.setFixedHeight(400)
+        add_col_widget.setFixedWidth(450)
+        add_col_layout = qg.QVBoxLayout()
+        add_col_widget.setLayout(add_col_layout)
+        add_col_widget.layout().setAlignment(qc.Qt.AlignTop)
+        add_col_widget.layout().setSpacing(10)
         
-        # Info Layout
-        columns = sorted(table.keys())
-        num_columns = len(columns)
-        info_layout.setSpacing(17)
-        info_layout.setAlignment(qc.Qt.AlignTop)
         
+        # Add column widgets
         # Font
         font = qg.QFont()
         font.setBold(True)
         font.setCapitalization(qg.QFont.Capitalize)
-        font.setPixelSize(16)
+        font.setPixelSize(12)
         
-        # Data Columns
-        self.columns_labels = []
+        new_col_lb = qg.QLabel('Add new Column')
+        new_col_lb.setFont(font)
+        new_col_name_txt = qg.QLineEdit()
+        new_col_name_txt.setMinimumWidth(400)
+        new_col_name_txt.setPlaceholderText('Type New Column name ...')
         
-        for col in columns:
-            label_col = qg.QLabel()
-            label_col.setFont(font)
-            self.columns_labels.append(label_col)
-            label_col.setText(col)
-            info_layout.addWidget(label_col)
-        # Just for testing
-#         counter = 0
-#         for col in self.columns_labels:
-#             col.setText(str(counter))
-#             counter += 1
+        col_name1_lb = qg.QLabel('Column 1 Name')
+        col_name1_lb.setFont(font)
+        col_name1_txt = qg.QLineEdit()
+        col_name1_txt.setPlaceholderText('Type Column name')
         
+        col_name2_lb = qg.QLabel('Column 2 Name')
+        col_name2_lb.setFont(font)
+        col_name2_txt = qg.QLineEdit()
+        col_name2_txt.setPlaceholderText('Type Column name')
         
+        col_logic_lb = qg.QLabel('Logic')
+        col_logic_lb.setFont(font)
+        col_logic_txt = qg.QTextEdit()
+        col_logic_txt.setText('Type the logic that relates the columns, e.g...'
+                              '\ndef male_female_child(passenger):\n'
+                              '    age,sex = passenger\n'
+                              '    if age < 16:\n'
+                              '        return "child"\n'
+                              '    else:\n'
+                              '        return sex')
+        col_logic_txt.setMaximumHeight(150)
+        
+        new_col_btn = qg.QPushButton('Add Column')
+        
+        # Add widgets to column layout
+        add_col_layout.addWidget(new_col_lb)
+        add_col_layout.addWidget(new_col_name_txt)
+        add_col_layout.addWidget(col_name1_lb)
+        add_col_layout.addWidget(col_name1_txt)
+        add_col_layout.addWidget(col_name2_lb)
+        add_col_layout.addWidget(col_name2_txt)
+        add_col_layout.addWidget(col_logic_lb)
+        add_col_layout.addWidget(col_logic_txt)
+        add_col_layout.addWidget(new_col_btn)
         
         # Button_layout
         btns_widget = qg.QWidget()
@@ -149,11 +170,12 @@ class main_dialog(qg.QDialog):
         btns_widget.setLayout(btns_layout)
         btns_layout.setSpacing(4)
         btns_layout.setAlignment(qc.Qt.AlignTop)
-        btns_layout.addWidget(qg.QPushButton('test'))
+        btns_layout.addWidget(qg.QPushButton('Test'))
         
-        main_info_layout.addWidget(parent_info_widget)
-        main_info_layout.addWidget(btns_widget)
+        main_left_layout.addWidget(add_col_widget)
+        main_left_layout.addWidget(btns_widget)
 
+        # ---------------- Right UI --------------------------
         
         # Table Layout
         table_layout = qg.QHBoxLayout()
@@ -161,15 +183,17 @@ class main_dialog(qg.QDialog):
         table_layout.setAlignment(qc.Qt.AlignTop)
         
         # Table widget
+        columns = sorted(table.keys())
         table_w = qg.QTableWidget()
         pref_size = len(columns) * 106
         resize = False
         if pref_size < TABLE_SIZE:
-            table_w.setFixedWidth(pref_size)
+            table_w.setMinimumWidth(pref_size)
         else:
             resize = True
-            table_w.setFixedWidth(TABLE_SIZE)
-            table_w.setFixedHeight(700)
+            table_w.setMinimumWidth(TABLE_SIZE)
+        
+        table_w.setMinimumHeight(700)
         
         # Add values to the table
         for column in columns:
@@ -186,6 +210,8 @@ class main_dialog(qg.QDialog):
 
                     elif isinstance(value, str):
                         value = str(table[column][i])
+                        if value == 'nan':
+                            value = '---'
                     
                     table_item = qg.QTableWidgetItem(value)
                     
@@ -203,7 +229,7 @@ class main_dialog(qg.QDialog):
         table_layout.addWidget(table_w)
         
         # Added Main Layout
-        main_layout.addLayout(main_info_layout)
+        main_layout.addLayout(main_left_layout)
         main_layout.addLayout(table_layout)
         page1_widget.setLayout(main_layout)
         

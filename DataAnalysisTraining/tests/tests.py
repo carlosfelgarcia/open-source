@@ -32,20 +32,22 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # example data
-mu = 100  # mean of distribution
-sigma = 15  # standard deviation of distribution
-x = mu + sigma * np.random.randn(10000)
-print x
-num_bins = 50
-# the histogram of the data
-n, bins, patches = plt.hist(x, num_bins, normed=1, facecolor='green', alpha=0.5)
-# add a 'best fit' line
-y = mlab.normpdf(bins, mu, sigma)
-plt.plot(bins, y, 'r--')
-plt.xlabel('Smarts')
-plt.ylabel('Probability')
-plt.title(r'Histogram of IQ: $\mu=100$, $\sigma=15$')
-
-# Tweak spacing to prevent clipping of ylabel
-plt.subplots_adjust(left=0.15)
-plt.show()
+# mu = 100  # mean of distribution
+# sigma = 15  # standard deviation of distribution
+# x = mu + sigma * np.random.randn(10000)
+# print x
+# num_bins = 50
+# # the histogram of the data
+# n, bins, patches = plt.hist(x, num_bins, normed=1, facecolor='green', alpha=0.5)
+# # add a 'best fit' line
+# y = mlab.normpdf(bins, mu, sigma)
+# plt.plot(bins, y, 'r--')
+# plt.xlabel('Smarts')
+# plt.ylabel('Probability')
+# plt.title(r'Histogram of IQ: $\mu=100$, $\sigma=15$')
+# 
+# # Tweak spacing to prevent clipping of ylabel
+# plt.subplots_adjust(left=0.15)
+# plt.show()
+titanic_df = pd.read_csv('winequality_red.csv')
+print titanic_df

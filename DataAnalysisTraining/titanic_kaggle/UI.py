@@ -100,15 +100,15 @@ class main_dialog(qg.QDialog):
         # Main Layout
         main_layout = qg.QHBoxLayout()
         main_layout.setContentsMargins(5, 5, 5, 5)
-        main_layout.setSpacing(200)
+        main_layout.setSpacing(100)
         
-        # ---------------- Left UI --------------------------
+        # ---------------- Left Side UI --------------------------
         main_left_layout = qg.QVBoxLayout()
         main_left_layout.setContentsMargins(5, 5, 5, 5)
         main_left_layout.setSpacing(50)
         
         add_col_widget = qg.QWidget()
-        add_col_widget.setFixedHeight(400)
+        add_col_widget.setFixedHeight(500)
         add_col_widget.setFixedWidth(450)
         add_col_layout = qg.QVBoxLayout()
         add_col_widget.setLayout(add_col_layout)
@@ -125,44 +125,55 @@ class main_dialog(qg.QDialog):
         
         new_col_lb = qg.QLabel('Add new Column')
         new_col_lb.setFont(font)
-        new_col_name_txt = qg.QLineEdit()
-        new_col_name_txt.setMinimumWidth(400)
-        new_col_name_txt.setPlaceholderText('Type New Column name ...')
+        self._txt_new_col_name = qg.QLineEdit()
+        self._txt_new_col_name.setMinimumWidth(400)
+        self._txt_new_col_name.setPlaceholderText('Type New Column name')
         
         col_name1_lb = qg.QLabel('Column 1 Name')
         col_name1_lb.setFont(font)
-        col_name1_txt = qg.QLineEdit()
-        col_name1_txt.setPlaceholderText('Type Column name')
+        self._txt_col_name1 = qg.QLineEdit()
+        self._txt_col_name1.setPlaceholderText('Type Column name')
         
         col_name2_lb = qg.QLabel('Column 2 Name')
         col_name2_lb.setFont(font)
-        col_name2_txt = qg.QLineEdit()
-        col_name2_txt.setPlaceholderText('Type Column name')
+        self._txt_col_name2 = qg.QLineEdit()
+        self._txt_col_name2.setPlaceholderText('Type Column name')
         
-        col_logic_lb = qg.QLabel('Logic')
-        col_logic_lb.setFont(font)
-        col_logic_txt = qg.QTextEdit()
-        col_logic_txt.setText('Type the logic that relates the columns, e.g...'
-                              '\ndef male_female_child(passenger):\n'
-                              '    age,sex = passenger\n'
-                              '    if age < 16:\n'
-                              '        return "child"\n'
-                              '    else:\n'
-                              '        return sex')
-        col_logic_txt.setMaximumHeight(150)
+        col_funct_name_lb = qg.QLabel('Fuction name')
+        col_funct_name_lb.setFont(font)
+        self._txt_col_funct_name = qg.QLineEdit()
+        self._txt_col_funct_name.setPlaceholderText('Type Function Name')
+        col_function_lb = qg.QLabel('Function')
+        col_function_lb.setFont(font)
+        self._txt_col_function = qg.QTextEdit()
+        self._txt_col_function.setText('Type the function that relates the columns,'
+                                 ' e.g...'
+                                 '\ndef male_female_child(passenger):\n'
+                                 '    age,sex = passenger\n'
+                                 '    if age < 16:\n'
+                                 '        return "child"\n'
+                                 '    else:\n'
+                                 '        return sex')
+        self._txt_col_function.setMaximumHeight(150)
         
-        new_col_btn = qg.QPushButton('Add Column')
+        add_col_btn = qg.QPushButton('Add Column')
+        delete_column_btn = qg.QPushButton('Delete Column')
+        save_table_btn = qg.QPushButton('Save New Column(s)')
         
         # Add widgets to column layout
         add_col_layout.addWidget(new_col_lb)
-        add_col_layout.addWidget(new_col_name_txt)
+        add_col_layout.addWidget(self._txt_new_col_name)
         add_col_layout.addWidget(col_name1_lb)
-        add_col_layout.addWidget(col_name1_txt)
+        add_col_layout.addWidget(self._txt_col_name1)
         add_col_layout.addWidget(col_name2_lb)
-        add_col_layout.addWidget(col_name2_txt)
-        add_col_layout.addWidget(col_logic_lb)
-        add_col_layout.addWidget(col_logic_txt)
-        add_col_layout.addWidget(new_col_btn)
+        add_col_layout.addWidget(self._txt_col_name2)
+        add_col_layout.addWidget(col_funct_name_lb)
+        add_col_layout.addWidget(self._txt_col_funct_name)
+        add_col_layout.addWidget(col_function_lb)
+        add_col_layout.addWidget(self._txt_col_function)
+        add_col_layout.addWidget(add_col_btn)
+        add_col_layout.addWidget(delete_column_btn)
+        add_col_layout.addWidget(save_table_btn)
         
         # Button_layout
         btns_widget = qg.QWidget()
@@ -175,7 +186,7 @@ class main_dialog(qg.QDialog):
         main_left_layout.addWidget(add_col_widget)
         main_left_layout.addWidget(btns_widget)
 
-        # ---------------- Right UI --------------------------
+        # ---------------- Right Side UI --------------------------
         
         # Table Layout
         table_layout = qg.QHBoxLayout()
@@ -237,12 +248,24 @@ class main_dialog(qg.QDialog):
         
         self.layout().addWidget(tab_widget)
     
+        # --------------------- Connections -----------------------------
+        add_col_btn.clicked.connect(self.add_column)
+        
+    # ------------------ Class UI Methods ------------------------------
+    def add_column(self):
+        new_col_name = self._txt_new_col_name.text()
+        col_name1 = self._txt_col_name1.text()
+        col_name2 = self._txt_col_name2.text()
+        function_name = self._txt_col_funct_name.text()
+        function = self._txt_col_function.toPlainText()
 
 def run():
+    # Main Class instance
     titanic = main.Main_Titanic()
     table = titanic.get_data('train.csv')
-    app = qg.QApplication(sys.argv)
     
+    # UI
+    app = qg.QApplication(sys.argv)
     main_ui = UI()
     dialog = main_dialog(table)
     main_ui.setCentralWidget(dialog)

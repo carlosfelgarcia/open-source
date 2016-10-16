@@ -21,9 +21,9 @@ import main
 TABLE_SIZE = 700
 
 
-class UI(qg.QMainWindow):
+class MainWindow(qg.QMainWindow):
     '''
-    Main UI
+    MainWindow
     '''
 
     def __init__(self):
@@ -35,7 +35,7 @@ class UI(qg.QMainWindow):
         
         # Main Window
         qg.QMainWindow.__init__(self)
-        self.setWindowTitle('UI Test')
+        self.setWindowTitle('MainWindow Test')
         pos = qg.QApplication.desktop().cursor().pos()
         screen = qg.QApplication.desktop().screenNumber(pos)
         centerPoint = qg.QApplication.desktop().screenGeometry(screen).center()
@@ -79,7 +79,7 @@ class UI(qg.QMainWindow):
         print 'open'
 
 
-class main_dialog(qg.QDialog):
+class MainDialog(qg.QDialog):
     '''
     This is the main dialog
     '''
@@ -259,19 +259,15 @@ class main_dialog(qg.QDialog):
         function_name = self._txt_col_funct_name.text()
         function = self._txt_col_function.toPlainText()
 
-def run():
+if __name__ == '__main__':
     # Main Class instance
     titanic = main.Main_Titanic()
     table = titanic.get_data('train.csv')
     
     # UI
     app = qg.QApplication(sys.argv)
-    main_ui = UI()
-    dialog = main_dialog(table)
+    main_ui = MainWindow()
+    dialog = MainDialog(table)
     main_ui.setCentralWidget(dialog)
     main_ui.show()
     sys.exit(app.exec_())
-
-
-if __name__ == '__main__':
-    run()

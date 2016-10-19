@@ -6,7 +6,7 @@ Created on Oct 18, 2016
 from abc import ABCMeta, abstractmethod
 
 
-class DataInterface(object):
+class DataInterface:
     '''
     classdocs
     '''
@@ -17,5 +17,5 @@ class DataInterface(object):
         pass
     
     @abstractmethod
-    def write_file(self, path):
+    def write_file(self, path, content):
         pass

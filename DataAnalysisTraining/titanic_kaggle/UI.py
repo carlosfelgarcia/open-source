@@ -15,7 +15,7 @@ import collections
 import numpy as np
 
 # Core imports
-import main
+import main_titanic
 
 # Constants
 TABLE_SIZE = 700
@@ -83,8 +83,12 @@ class MainDialog(qg.QDialog):
     '''
     This is the main dialog
     '''
-    def __init__(self, table):
+    def __init__(self, titanic):
         qg.QDialog.__init__(self)
+        
+        # World instance
+        self._titanic = titanic
+        table = self._titanic.get_data('train.csv')
         
         self.setLayout(qg.QHBoxLayout())
         self.layout().setContentsMargins(5, 5, 5, 5)
@@ -141,7 +145,11 @@ class MainDialog(qg.QDialog):
         
         col_funct_name_lb = qg.QLabel('Fuction name')
         col_funct_name_lb.setFont(font)
+        self._clean_txt = 0
         self._txt_col_funct_name = qg.QLineEdit()
+        reg_ex = qc.QRegExp("[a-z0-9]+")
+        text_validator = qg.QRegExpValidator(reg_ex, self._txt_col_funct_name)
+        self._txt_col_funct_name.setValidator(text_validator)
         self._txt_col_funct_name.setPlaceholderText('Type Function Name')
         col_function_lb = qg.QLabel('Function')
         col_function_lb.setFont(font)
@@ -250,6 +258,8 @@ class MainDialog(qg.QDialog):
     
         # --------------------- Connections -----------------------------
         add_col_btn.clicked.connect(self.add_column)
+        self._txt_col_function.selectionChanged.connect(self._clean_txt_field)
+        self._txt_col_funct_name.editingFinished.connect(self._add_function_txt)
         
     # ------------------ Class UI Methods ------------------------------
     def add_column(self):
@@ -258,16 +268,31 @@ class MainDialog(qg.QDialog):
         col_name2 = self._txt_col_name2.text()
         function_name = self._txt_col_funct_name.text()
         function = self._txt_col_function.toPlainText()
-
+        added = self._titanic.add_new_fucntion(function_name, function)
+        if not added:
+            print ':('
+        print ':)'
+        
+    def _clean_txt_field(self):
+        if self._clean_txt == 0:
+            self._clean_txt = 1
+            self._txt_col_function.clear()
+            
+    def _add_function_txt(self):
+        if self._clean_txt == 0:
+            self._clean_txt = 1
+            function_name = self._txt_col_funct_name.text()
+            txt = "def %s():\n    " % function_name
+            self._txt_col_function.setText(txt)
+            
 if __name__ == '__main__':
     # Main Class instance
-    titanic = main.Main_Titanic()
-    table = titanic.get_data('train.csv')
+    titanic = main_titanic.MainTitanic()
     
     # UI
     app = qg.QApplication(sys.argv)
     main_ui = MainWindow()
-    dialog = MainDialog(table)
+    dialog = MainDialog(titanic)
     main_ui.setCentralWidget(dialog)
     main_ui.show()
     sys.exit(app.exec_())

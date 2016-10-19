@@ -13,11 +13,11 @@ class DataFactory(object):
     classdocs
     '''
 
-    def __init__(self, params):
+    def __init__(self):
         '''
         Constructor
         '''
-        self._class_list = {'csv': csv_handle, 'py': python_handle}
+        self._class_list = {'.csv': csv_handle.CSVHandle, '.py': python_handle.PythonHandle}
         
     def get_class(self, data_type):
         return self._class_list[data_type]

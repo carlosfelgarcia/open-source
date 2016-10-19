@@ -5,26 +5,26 @@ Created on Oct 18, 2016
 '''
 
 # External Libraries Imports
-import pandas as pd
+from pandas import read_csv
 
 # Internal Imports
-import interface_data
+from interface_data import DataInterface
 
 
-class CSVHandle(interface_data):
+class CSVHandle(DataInterface):
     '''
     classdocs
     '''
 
-    def __init__(self, params):
+    def __init__(self):
         '''
         Constructor
         '''
         pass
 
     def read_file(self, path):
-        data_frame = pd.read_csv(path).to_dict('list')
+        data_frame = read_csv(path).to_dict('list')
         return data_frame
 
-    def write_file(self, path):
+    def write_file(self, path, content):
         pass

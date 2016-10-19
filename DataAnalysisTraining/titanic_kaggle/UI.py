@@ -63,18 +63,18 @@ class MainWindow(qg.QMainWindow):
         open_action.setStatusTip("Open File")
         
         # Connections
-        quit_action.triggered.connect(self.close_window)
-        open_action.triggered.connect(self.open_file)
+        quit_action.triggered.connect(self._close_window)
+        open_action.triggered.connect(self._open_file)
         
         # Add Actions to the list
         self.file_actions.append(quit_action)
         self.file_actions.append(open_action)
         
-    def close_window(self):
+    def _close_window(self):
         # TODO
         print 'close'
         
-    def open_file(self):
+    def _open_file(self):
         # TODO
         print 'open'
 

@@ -9,4 +9,4 @@ def test(f='hello world'):
 
 
 def test2():
-    print 'Hello world 2 :)'
+    print "Hello"

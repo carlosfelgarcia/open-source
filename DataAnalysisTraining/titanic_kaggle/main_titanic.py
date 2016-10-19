@@ -23,16 +23,16 @@ class MainTitanic(object):
         '''
         Constructor
         '''
-        self._function_list = ['test']
+        self._function_list = dir(utils)
         self._factory = data_factory.DataFactory()
-    
+
     def get_data(self, path):
         """
             TODO
         """
         data = None
         if os.path.exists(path):
-            ext = os.path.splitext(path)[1]
+            _, ext = os.path.splitext(path)
             handle = self._factory.get_class(ext)()
             data = handle.read_file(path)
         return data

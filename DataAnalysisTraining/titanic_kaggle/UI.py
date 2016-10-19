@@ -10,6 +10,7 @@ import PyQt4.QtGui as qg
 # Built-in imports
 import sys
 import collections
+import ctypes
 
 # External libraries Imports
 import numpy as np
@@ -131,17 +132,14 @@ class MainDialog(qg.QDialog):
         new_col_lb.setFont(font)
         self._txt_new_col_name = qg.QLineEdit()
         self._txt_new_col_name.setMinimumWidth(400)
-        self._txt_new_col_name.setPlaceholderText('Type New Column name')
         
         col_name1_lb = qg.QLabel('Column 1 Name')
         col_name1_lb.setFont(font)
         self._txt_col_name1 = qg.QLineEdit()
-        self._txt_col_name1.setPlaceholderText('Type Column name')
         
         col_name2_lb = qg.QLabel('Column 2 Name')
         col_name2_lb.setFont(font)
         self._txt_col_name2 = qg.QLineEdit()
-        self._txt_col_name2.setPlaceholderText('Type Column name')
         
         col_funct_name_lb = qg.QLabel('Fuction name')
         col_funct_name_lb.setFont(font)
@@ -150,19 +148,13 @@ class MainDialog(qg.QDialog):
         reg_ex = qc.QRegExp("[a-z0-9]+")
         text_validator = qg.QRegExpValidator(reg_ex, self._txt_col_funct_name)
         self._txt_col_funct_name.setValidator(text_validator)
-        self._txt_col_funct_name.setPlaceholderText('Type Function Name')
         col_function_lb = qg.QLabel('Function')
         col_function_lb.setFont(font)
         self._txt_col_function = qg.QTextEdit()
-        self._txt_col_function.setText('Type the function that relates the columns,'
-                                 ' e.g...'
-                                 '\ndef male_female_child(passenger):\n'
-                                 '    age,sex = passenger\n'
-                                 '    if age < 16:\n'
-                                 '        return "child"\n'
-                                 '    else:\n'
-                                 '        return sex')
         self._txt_col_function.setMaximumHeight(150)
+        
+        # Set default values
+        self._set_default_values()
         
         add_col_btn = qg.QPushButton('Add Column')
         delete_column_btn = qg.QPushButton('Delete Column')
@@ -263,22 +255,59 @@ class MainDialog(qg.QDialog):
         
     # ------------------ Class UI Methods ------------------------------
     def add_column(self):
+        """
+            TODO
+        """
         new_col_name = self._txt_new_col_name.text()
         col_name1 = self._txt_col_name1.text()
         col_name2 = self._txt_col_name2.text()
         function_name = self._txt_col_funct_name.text()
         function = self._txt_col_function.toPlainText()
-        added = self._titanic.add_new_fucntion(function_name, function)
-        if not added:
-            print ':('
+        funtion_added = self._titanic.add_new_fucntion(function_name, function)
+        if not funtion_added:
+            self._clean_txt = 0
+            qg.QMessageBox.information(self, 'Titanic Data Analysis',
+                                       'The function already exist',
+                                       buttons=qg.QMessageBox.Ok,
+                                       defaultButton=qg.QMessageBox.NoButton)
+            return
         print ':)'
+        self._set_default_values()
         
+    def _set_default_values(self):
+        """
+            TODO
+        """
+        self._txt_new_col_name.clear()
+        self._txt_new_col_name.setPlaceholderText('Type New Column name')
+        self._txt_col_name1.clear()
+        self._txt_col_name1.setPlaceholderText('Type Column name')
+        self._txt_col_name2.clear()
+        self._txt_col_name2.setPlaceholderText('Type Column name')
+        self._txt_col_funct_name.clear()
+        self._txt_col_funct_name.setPlaceholderText('Type Function Name')
+        self._txt_col_function.setText('Type the function that relates'
+                                       ' the columns, e.g...'
+                                       '\ndef male_female_child(passenger):\n'
+                                       '    age,sex = passenger\n'
+                                       '    if age < 16:\n'
+                                       '        return "child"\n'
+                                       '    else:\n'
+                                       '        return sex')
+        self._clean_txt = 0
+
     def _clean_txt_field(self):
+        """
+            TODO
+        """
         if self._clean_txt == 0:
             self._clean_txt = 1
             self._txt_col_function.clear()
             
     def _add_function_txt(self):
+        """
+            TODO
+        """
         if self._clean_txt == 0:
             self._clean_txt = 1
             function_name = self._txt_col_funct_name.text()

@@ -206,33 +206,8 @@ class MainDialog(qg.QDialog):
         
         table_w.setMinimumHeight(700)
         
-        # Add values to the table
-        for column in columns:
-            col_num = table_w.columnCount()
-            row_total_num = table_w.rowCount()
-            table_w.insertColumn(col_num)
-            col_item = qg.QTableWidgetItem(column)
-            table_w.setHorizontalHeaderItem(col_num, col_item)
-            if isinstance(table[column], collections.Iterable):
-                for i in xrange(len(table[column])):
-                    value = ''
-                    if isinstance(value, np.float64):
-                        value = np.int(table[column][i])
-
-                    elif isinstance(value, str):
-                        value = str(table[column][i])
-                        if value == 'nan':
-                            value = '---'
-                    
-                    table_item = qg.QTableWidgetItem(value)
-                    
-                    if i >= row_total_num:
-                        table_w.insertRow(i)
-                    table_w.setItem(i, col_num, table_item)
-            else:
-                table_w.insertRow(row_total_num)
-                table_item = qg.QTableWidgetItem(table[column])
-                table_w.setItem(row_total_num, col_num, table_item)
+        # Fill table
+        self._fill_columns(table_w, table, columns)
         
         if resize:
             table_w.resizeColumnsToContents()
@@ -313,6 +288,38 @@ class MainDialog(qg.QDialog):
             function_name = self._txt_col_funct_name.text()
             txt = "def %s():\n    " % function_name
             self._txt_col_function.setText(txt)
+            
+    def _fill_columns(self, table_w, table, columns):
+        # Clear table
+        table_w.clear()
+        
+        # Add values to the table
+        for column in columns:
+            col_num = table_w.columnCount()
+            row_total_num = table_w.rowCount()
+            table_w.insertColumn(col_num)
+            col_item = qg.QTableWidgetItem(column)
+            table_w.setHorizontalHeaderItem(col_num, col_item)
+            if isinstance(table[column], collections.Iterable):
+                for i in xrange(len(table[column])):
+                    value = ''
+                    if isinstance(value, np.float64):
+                        value = np.int(table[column][i])
+
+                    elif isinstance(value, str):
+                        value = str(table[column][i])
+                        if value == 'nan':
+                            value = '---'
+                    
+                    table_item = qg.QTableWidgetItem(value)
+                    
+                    if i >= row_total_num:
+                        table_w.insertRow(i)
+                    table_w.setItem(i, col_num, table_item)
+            else:
+                table_w.insertRow(row_total_num)
+                table_item = qg.QTableWidgetItem(table[column])
+                table_w.setItem(row_total_num, col_num, table_item)
             
 if __name__ == '__main__':
     # Main Class instance

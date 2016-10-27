@@ -89,7 +89,7 @@ class MainDialog(qg.QDialog):
         
         # World instance
         self._titanic = titanic
-        table = self._titanic.get_data('train.csv')
+        table = self._titanic.get_data_file('train.csv')
         
         self.setLayout(qg.QHBoxLayout())
         self.layout().setContentsMargins(5, 5, 5, 5)
@@ -233,22 +233,45 @@ class MainDialog(qg.QDialog):
         """
             TODO
         """
+        # Get all the values
         new_col_name = self._txt_new_col_name.text()
         col_name1 = self._txt_col_name1.text()
         col_name2 = self._txt_col_name2.text()
         function_name = self._txt_col_funct_name.text()
         function = self._txt_col_function.toPlainText()
-        funtion_added = self._titanic.add_new_fucntion(function_name, function)
-        if not funtion_added:
-            self._clean_txt = 0
-            qg.QMessageBox.information(self, 'Titanic Data Analysis',
-                                       'The function already exist',
-                                       buttons=qg.QMessageBox.Ok,
-                                       defaultButton=qg.QMessageBox.NoButton)
+        
+        # Check if all the values are filled
+        if not self._check_fields([new_col_name, col_name1, col_name2,
+                                   function_name, function]):
             return
-        print ':)'
+            
+        funtion_added = self._titanic.add_new_fucntion(function_name, function)
+        if funtion_added is not None:
+            self._clean_txt = 0
+            self.default_warning(funtion_added)
+            return
+        print 'TODO :)'
+        
+        # Set the UI back to default
         self._set_default_values()
         
+    def _check_fields(self, fields):
+        """
+            TODO
+        """
+        for value in fields:
+            if value == '' or value is None:
+                self._clean_txt = 0
+                self.default_warning('All the values need to be filled')
+                return False
+        return True
+    
+    def default_warning(self, msn):
+        qg.QMessageBox.warning(self, 'Titanic Data Analysis',
+                               msn,
+                               buttons=qg.QMessageBox.Ok,
+                               defaultButton=qg.QMessageBox.NoButton)
+    
     def _set_default_values(self):
         """
             TODO

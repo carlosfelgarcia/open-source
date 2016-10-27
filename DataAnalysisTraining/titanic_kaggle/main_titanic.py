@@ -10,8 +10,8 @@ Created on Oct 12, 2016
 import os
 
 # Internal Classes
-import utils
 import data_factory
+import data_analysis
 
 
 class MainTitanic(object):
@@ -23,10 +23,10 @@ class MainTitanic(object):
         '''
         Constructor
         '''
-        self._function_list = dir(utils)
         self._factory = data_factory.DataFactory()
+        self._data_analysis = None
 
-    def get_data(self, path):
+    def get_data_file(self, path):
         """
             TODO
         """
@@ -34,22 +34,24 @@ class MainTitanic(object):
         if os.path.exists(path):
             _, ext = os.path.splitext(path)
             handle = self._factory.get_class(ext)()
-            data = handle.read_file(path)
-        return data
+            file_data = handle.read_file(path)
+            self._data_analysis = data_analysis.DataAnalysis(file_data)
+            
+        return self._data_analysis.get_data_frame()
     
     def add_new_fucntion(self, name, function):
         """
             TODO
         """
         # Make sure is a new function
-        if name in self._function_list:
-            return False
-        
-        self._function_list.append(name)
-        handle = self._factory.get_class('.py')()
-        handle.write_file('utils.py', function, 'a')
-        return True
+        if name in self._data_analysis.get_function_list():
+            return 'Error: A function with that name already exist'
+        py_handle = self._factory.get_class('.py')()
+        return self._data_analysis.add_function(name, function, py_handle)
     
-    def test_utils(self, txt):
-        reload(utils)
-        utils.test(txt)
+    def add_new_column(self, new_col_name, col1_name, col2_name, fun_name):
+        """
+        TODO
+        """
+        pass
+

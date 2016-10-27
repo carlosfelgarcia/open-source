@@ -7,6 +7,3 @@ Created on Oct 13, 2016
 def test(f='hello world'):
     print f
 
-
-def test2():
-    print "Hello"

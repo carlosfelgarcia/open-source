@@ -7,7 +7,7 @@ Created on Oct 18, 2016
 # Internal Imports
 from interface_data import DataInterface
 from shutil import copy2, move
-from os import remove
+from os import remove, path
 
 
 class PythonHandle(DataInterface):
@@ -55,7 +55,8 @@ class PythonHandle(DataInterface):
         """
         TODO
         """
-        remove(self._backup_path)
+        if path.exists(self._backup_path):
+            remove(self._backup_path)
         
     def rollback(self, path):
         """

@@ -17,6 +17,7 @@ import numpy as np
 
 # Core imports
 import main_titanic
+from bokeh.layouts import column
 
 # Constants
 TABLE_SIZE = 700
@@ -145,7 +146,7 @@ class MainDialog(qg.QDialog):
         col_funct_name_lb.setFont(font)
         self._clean_txt = 0
         self._txt_col_funct_name = qg.QLineEdit()
-        reg_ex = qc.QRegExp("[a-z0-9]+")
+        reg_ex = qc.QRegExp("[a-z0-9_]+")
         text_validator = qg.QRegExpValidator(reg_ex, self._txt_col_funct_name)
         self._txt_col_funct_name.setValidator(text_validator)
         col_function_lb = qg.QLabel('Function')
@@ -195,24 +196,24 @@ class MainDialog(qg.QDialog):
         
         # Table widget
         columns = sorted(table.keys())
-        table_w = qg.QTableWidget()
+        self._table_w = qg.QTableWidget()
         pref_size = len(columns) * 106
         resize = False
         if pref_size < TABLE_SIZE:
-            table_w.setMinimumWidth(pref_size)
+            self._table_w.setMinimumWidth(pref_size)
         else:
             resize = True
-            table_w.setMinimumWidth(TABLE_SIZE)
+            self._table_w.setMinimumWidth(TABLE_SIZE)
         
-        table_w.setMinimumHeight(700)
+        self._table_w.setMinimumHeight(700)
         
         # Fill table
-        self._fill_columns(table_w, table, columns)
+        self._fill_columns(table, columns)
         
         if resize:
-            table_w.resizeColumnsToContents()
-            table_w.resizeRowsToContents()
-        table_layout.addWidget(table_w)
+            self._table_w.resizeColumnsToContents()
+            self._table_w.resizeRowsToContents()
+        table_layout.addWidget(self._table_w)
         
         # Added Main Layout
         main_layout.addLayout(main_left_layout)
@@ -234,23 +235,30 @@ class MainDialog(qg.QDialog):
             TODO
         """
         # Get all the values
-        new_col_name = self._txt_new_col_name.text()
-        col_name1 = self._txt_col_name1.text()
-        col_name2 = self._txt_col_name2.text()
-        function_name = self._txt_col_funct_name.text()
-        function = self._txt_col_function.toPlainText()
+        new_col_name = str(self._txt_new_col_name.text())
+        col_name1 = str(self._txt_col_name1.text())
+        col_name2 = str(self._txt_col_name2.text())
+        function_name = str(self._txt_col_funct_name.text())
+        function = str(self._txt_col_function.toPlainText())
         
         # Check if all the values are filled
         if not self._check_fields([new_col_name, col_name1, col_name2,
                                    function_name, function]):
             return
-            
+        
+        # Add new function
         funtion_added = self._titanic.add_new_fucntion(function_name, function)
         if funtion_added is not None:
             self._clean_txt = 0
             self.default_warning(funtion_added)
             return
-        print 'TODO :)'
+        
+        # Add the column and get the updated data frame
+        data_frame = self._titanic.add_new_column(new_col_name, col_name1,
+                                                  col_name2, function_name)
+        
+        # reload table values
+        self._fill_columns(data_frame)
         
         # Set the UI back to default
         self._set_default_values()
@@ -312,17 +320,21 @@ class MainDialog(qg.QDialog):
             txt = "def %s():\n    " % function_name
             self._txt_col_function.setText(txt)
             
-    def _fill_columns(self, table_w, table, columns):
+    def _fill_columns(self, table, columns=None):
         # Clear table
-        table_w.clear()
+        self._table_w.clearSpans()
         
+        # Get columns
+        if not columns:
+            columns = table.keys()
+            
         # Add values to the table
         for column in columns:
-            col_num = table_w.columnCount()
-            row_total_num = table_w.rowCount()
-            table_w.insertColumn(col_num)
+            col_num = self._table_w.columnCount()
+            row_total_num = self._table_w.rowCount()
+            self._table_w.insertColumn(col_num)
             col_item = qg.QTableWidgetItem(column)
-            table_w.setHorizontalHeaderItem(col_num, col_item)
+            self._table_w.setHorizontalHeaderItem(col_num, col_item)
             if isinstance(table[column], collections.Iterable):
                 for i in xrange(len(table[column])):
                     value = ''
@@ -337,12 +349,12 @@ class MainDialog(qg.QDialog):
                     table_item = qg.QTableWidgetItem(value)
                     
                     if i >= row_total_num:
-                        table_w.insertRow(i)
-                    table_w.setItem(i, col_num, table_item)
+                        self._table_w.insertRow(i)
+                    self._table_w.setItem(i, col_num, table_item)
             else:
-                table_w.insertRow(row_total_num)
+                self._table_w.insertRow(row_total_num)
                 table_item = qg.QTableWidgetItem(table[column])
-                table_w.setItem(row_total_num, col_num, table_item)
+                self._table_w.setItem(row_total_num, col_num, table_item)
             
 if __name__ == '__main__':
     # Main Class instance

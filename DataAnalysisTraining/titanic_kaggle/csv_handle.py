@@ -23,7 +23,7 @@ class CSVHandle(DataInterface):
         pass
 
     def read_file(self, path):
-        data_frame = read_csv(path).to_dict('list')
+        data_frame = read_csv(path)
         return data_frame
 
     def write_file(self, path, content):

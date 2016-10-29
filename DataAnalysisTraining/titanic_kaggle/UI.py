@@ -37,7 +37,7 @@ class MainWindow(qg.QMainWindow):
         
         # Main Window
         qg.QMainWindow.__init__(self)
-        self.setWindowTitle('MainWindow Test')
+        self.setWindowTitle('Data Analysis Tool')
         pos = qg.QApplication.desktop().cursor().pos()
         screen = qg.QApplication.desktop().screenNumber(pos)
         centerPoint = qg.QApplication.desktop().screenGeometry(screen).center()
@@ -106,12 +106,12 @@ class MainDialog(qg.QDialog):
         # Main Layout
         main_layout = qg.QHBoxLayout()
         main_layout.setContentsMargins(5, 5, 5, 5)
-        main_layout.setSpacing(100)
+        main_layout.setSpacing(50)
         
         # ---------------- Left Side UI --------------------------
         main_left_layout = qg.QVBoxLayout()
         main_left_layout.setContentsMargins(5, 5, 5, 5)
-        main_left_layout.setSpacing(50)
+        main_left_layout.setSpacing(20)
         
         add_col_widget = qg.QWidget()
         add_col_widget.setFixedHeight(500)
@@ -120,7 +120,6 @@ class MainDialog(qg.QDialog):
         add_col_widget.setLayout(add_col_layout)
         add_col_widget.layout().setAlignment(qc.Qt.AlignTop)
         add_col_widget.layout().setSpacing(10)
-        
         
         # Add column widgets
         # Font
@@ -176,16 +175,42 @@ class MainDialog(qg.QDialog):
         add_col_layout.addWidget(delete_column_btn)
         add_col_layout.addWidget(save_table_btn)
         
-        # Button_layout
-        btns_widget = qg.QWidget()
-        btns_layout = qg.QHBoxLayout()
-        btns_widget.setLayout(btns_layout)
-        btns_layout.setSpacing(4)
-        btns_layout.setAlignment(qc.Qt.AlignTop)
-        btns_layout.addWidget(qg.QPushButton('Test'))
+        # Plot Layout
+        plot_widget = qg.QWidget()
+        plot_layout = qg.QVBoxLayout()
+        plot_widget.setLayout(plot_layout)
+        plot_layout.setSpacing(4)
+        plot_layout.setAlignment(qc.Qt.AlignTop)
         
+        data_analysis_lb = qg.QLabel('Data Analysis')
+        data_analysis_lb.setFont(font)
+        
+        self._plot_menu = qg.QComboBox()
+        self._plot_menu.addItems(['Column(s) Analysis'])
+        
+        column_names_lb = qg.QLabel('Column names, separated by comma.')
+        column_names_lb.setFont(font)
+        self._txt_col_names = qg.QLineEdit()
+        
+        radio_layout = qg.QHBoxLayout()
+        self._tab = qg.QRadioButton('Show in new Tab')
+        self._window = qg.QRadioButton('Show in new window')
+        radio_layout.addWidget(self._tab)
+        radio_layout.addWidget(self._window)
+        
+        plot_btn = qg.QPushButton('Show Plot')
+        
+        # Add widgets to plot layout
+        plot_layout.addWidget(data_analysis_lb)
+        plot_layout.addWidget(self._plot_menu)
+        plot_layout.addWidget(column_names_lb)
+        plot_layout.addWidget(self._txt_col_names)
+        plot_layout.addLayout(radio_layout)
+        plot_layout.addWidget(plot_btn)
+        
+        # Add main widgets
         main_left_layout.addWidget(add_col_widget)
-        main_left_layout.addWidget(btns_widget)
+        main_left_layout.addWidget(plot_widget)
 
         # ---------------- Right Side UI --------------------------
         
@@ -248,10 +273,15 @@ class MainDialog(qg.QDialog):
         
         # Add new function
         funtion_added = self._titanic.add_new_fucntion(function_name, function)
-        if funtion_added is not None:
-            self._clean_txt = 0
-            self.default_warning(funtion_added)
-            return
+        if funtion_added is False:
+            msn = 'This function already exist, do you want to continue?'
+            ans = self.default_question(msn)
+            # 0 = no 1= yes
+            if not ans:
+                self._clean_txt = 0
+                self.default_warning('The function was not added,'
+                                     ' please try again')
+                return
         
         # Add the column and get the updated data frame
         data_frame = self._titanic.add_new_column(new_col_name, col_name1,
@@ -275,10 +305,23 @@ class MainDialog(qg.QDialog):
         return True
     
     def default_warning(self, msn):
+        """
+        TODO
+        """
         qg.QMessageBox.warning(self, 'Titanic Data Analysis',
                                msn,
                                buttons=qg.QMessageBox.Ok,
                                defaultButton=qg.QMessageBox.NoButton)
+        
+    def default_question(self, msn, btn1='No', btn2='Yes'):
+        """
+        TODO
+        """
+        return qg.QMessageBox.question(self, 'Titanic Data Analysis',
+                                       msn,
+                                       btn1,
+                                       btn2,
+                                       defaultButtonNumber=0)
     
     def _set_default_values(self):
         """
@@ -322,11 +365,12 @@ class MainDialog(qg.QDialog):
             
     def _fill_columns(self, table, columns=None):
         # Clear table
-        self._table_w.clearSpans()
+        self._table_w.setRowCount(0)
+        self._table_w.setColumnCount(0)
         
         # Get columns
         if not columns:
-            columns = table.keys()
+            columns = sorted(table.keys())
             
         # Add values to the table
         for column in columns:
@@ -355,6 +399,9 @@ class MainDialog(qg.QDialog):
                 self._table_w.insertRow(row_total_num)
                 table_item = qg.QTableWidgetItem(table[column])
                 self._table_w.setItem(row_total_num, col_num, table_item)
+                
+        self._table_w.resizeColumnsToContents()
+        self._table_w.resizeRowsToContents()
             
 if __name__ == '__main__':
     # Main Class instance

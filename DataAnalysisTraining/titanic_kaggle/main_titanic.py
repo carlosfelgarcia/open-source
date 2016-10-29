@@ -45,15 +45,17 @@ class MainTitanic(object):
         """
         # Make sure is a new function
         if name in self._data_analysis.get_function_list():
-            return 'Error: A function with that name already exist'
+            return False
         self._current_py_handle = self._factory.get_class('.py')()
-        return self._data_analysis.add_function(name, function, 
-                                                self._current_py_handle)
+        self._data_analysis.add_function(name, function,
+                                         self._current_py_handle)
+        return True
     
     def add_new_column(self, new_col_name, col1_name, col2_name, fun_name):
         """
         TODO
         """
+        # TODO Check for names of columns
         try:
             self._data_analysis.add_new_column(new_col_name, col1_name,
                                                col2_name, fun_name)
@@ -63,7 +65,7 @@ class MainTitanic(object):
          
         except Exception, e:
             if self._current_py_handle:
-                self._data_analysis.rollback(self._current_py_handle)
+                self._data_analysis.rollback_backup(self._current_py_handle)
                 self._data_analysis.clear_backup(self._current_py_handle)
                 self._current_py_handle = None
             raise e

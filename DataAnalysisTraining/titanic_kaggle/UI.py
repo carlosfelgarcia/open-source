@@ -10,10 +10,10 @@ import PyQt4.QtGui as qg
 # Built-in imports
 import sys
 import collections
-import ctypes
 
 # External libraries Imports
 import numpy as np
+from matplotlib import pyplot
 
 # Core imports
 import main_titanic
@@ -253,6 +253,7 @@ class MainDialog(qg.QDialog):
         add_col_btn.clicked.connect(self.add_column)
         self._txt_col_function.selectionChanged.connect(self._clean_txt_field)
         self._txt_col_funct_name.editingFinished.connect(self._add_function_txt)
+        plot_btn.clicked.connect(self.show_plot)
         
     # ------------------ Class UI Methods ------------------------------
     def add_column(self):
@@ -402,6 +403,14 @@ class MainDialog(qg.QDialog):
                 
         self._table_w.resizeColumnsToContents()
         self._table_w.resizeRowsToContents()
+        
+    def show_plot(self):
+        """
+        TODO
+        """
+        #plot_widget = qg.QWidget()
+        pg = self._titanic.test_plot()
+        pg.map()
             
 if __name__ == '__main__':
     # Main Class instance

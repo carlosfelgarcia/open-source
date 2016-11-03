@@ -3,8 +3,6 @@ Created on Oct 12, 2016
 
 @author: User
 '''
-# External Libraries Imports
-
 
 # BuiltIn Imports
 import os
@@ -12,6 +10,7 @@ import os
 # Internal Classes
 import data_factory
 import data_analysis
+import plot_generator
 
 
 class MainTitanic(object):
@@ -26,6 +25,7 @@ class MainTitanic(object):
         self._factory = data_factory.DataFactory()
         self._current_py_handle = None
         self._data_analysis = None
+        self._plot_generator = None
 
     def get_data_file(self, path):
         """
@@ -71,4 +71,9 @@ class MainTitanic(object):
             raise e
         
         return self._data_analysis.get_data_frame_list()
+    
+    def test_plot(self):
+        df = self._data_analysis.get_data_frame()
+        self._plot_generator = plot_generator.PlotGenerator(df)
+        return self._plot_generator.test()
 

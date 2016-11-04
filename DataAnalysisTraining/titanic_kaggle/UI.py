@@ -13,7 +13,7 @@ import collections
 
 # External libraries Imports
 import numpy as np
-from matplotlib import pyplot
+import matplotlib.pyplot as plt
 
 # Core imports
 import main_titanic
@@ -408,10 +408,9 @@ class MainDialog(qg.QDialog):
         """
         TODO
         """
-        #plot_widget = qg.QWidget()
         pg = self._titanic.test_plot()
-        pg.map()
-            
+        pg.fig.show()
+    
 if __name__ == '__main__':
     # Main Class instance
     titanic = main_titanic.MainTitanic()

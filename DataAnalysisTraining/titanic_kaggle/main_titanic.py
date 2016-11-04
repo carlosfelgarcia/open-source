@@ -25,7 +25,7 @@ class MainTitanic(object):
         self._factory = data_factory.DataFactory()
         self._current_py_handle = None
         self._data_analysis = None
-        self._plot_generator = None
+        self._plot_generator = plot_generator.PlotGenerator()
 
     def get_data_file(self, path):
         """
@@ -74,6 +74,5 @@ class MainTitanic(object):
     
     def test_plot(self):
         df = self._data_analysis.get_data_frame()
-        self._plot_generator = plot_generator.PlotGenerator(df)
-        return self._plot_generator.test()
+        return self._plot_generator.test(df)
 

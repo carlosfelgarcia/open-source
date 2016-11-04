@@ -12,11 +12,11 @@ class PlotGenerator(object):
     classdocs
     '''
 
-    def __init__(self, data_frame):
+    def __init__(self):
         '''
         Constructor
         '''
-        self._data_frame = data_frame
+        pass
     
-    def test(self):
-        sns.factorplot(x='Sex', data=self._data_frame)
+    def test(self, df):
+        return sns.factorplot('Sex', data=df, kind='count')

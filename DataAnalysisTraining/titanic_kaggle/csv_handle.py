@@ -5,7 +5,11 @@ Created on Oct 18, 2016
 '''
 
 # External Libraries Imports
-from pandas import read_csv
+import pandas as pd
+from pandas import Series,DataFrame
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Internal Imports
 from interface_data import DataInterface
@@ -23,8 +27,7 @@ class CSVHandle(DataInterface):
         pass
 
     def read_file(self, path):
-        data_frame = read_csv(path)
-        return data_frame
+        return pd.read_csv(path)
 
     def write_file(self, path, content):
         pass

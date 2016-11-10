@@ -26,6 +26,7 @@ class MainTitanic(object):
         self._current_py_handle = None
         self._data_analysis = None
         self._plot_generator = plot_generator.PlotGenerator()
+        self._plot_func_list = dir(self._plot_generator)
 
     def get_data_file(self, path):
         """
@@ -45,11 +46,12 @@ class MainTitanic(object):
         """
         # Make sure is a new function
         if name in self._data_analysis.get_function_list():
-            return False
+            return 0
         self._current_py_handle = self._factory.get_class('.py')()
-        self._data_analysis.add_function(name, function,
-                                         self._current_py_handle)
-        return True
+        if self._data_analysis.add_function(name, function,
+                                            self._current_py_handle):
+            return -1
+        return 1
     
     def add_new_column(self, new_col_name, col1_name, col2_name, fun_name):
         """
@@ -72,7 +74,33 @@ class MainTitanic(object):
         
         return self._data_analysis.get_data_frame_list()
     
-    def test_plot(self):
+    def get_plot_functions(self):
+        """
+        TODO
+        """
+        return [fun for fun in self._plot_func_list if not fun.startswith('_')]
+    
+    def get_plot(self, values, graph, df=None):
+        """
+        TODO
+        """
+        if not df:
+            df = self._data_analysis.get_data_frame()
+        function = getattr(self._plot_generator, graph)
+        return function(df, values)
+    
+    def save_df(self, file_path):
+        """
+        TODO
+        """
+        # Get the data frame
         df = self._data_analysis.get_data_frame()
-        return self._plot_generator.test(df)
-
+        
+        # Get the file handle
+        _, ext = os.path.splitext(file_path)
+        handle = self._factory.get_class(ext)()
+            
+        if not handle:
+            return
+        handle.write_file(file_path, df)
+        

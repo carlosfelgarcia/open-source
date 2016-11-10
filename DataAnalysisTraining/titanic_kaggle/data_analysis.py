@@ -42,13 +42,14 @@ class DataAnalysis(object):
         """
         TODO
         """
-        self._function_list.append(name)
         py_handle.write_file(self._function_path, function, 'a', True)
         try:
             reload(data_functions)
+            self._function_list.append(name)
+            return True
         except SyntaxError:
-            py_handle.rollback_backup(self._function_path)
-            return 'Error: There are some Syntax errors in your function'
+            py_handle.rollback(self._function_path)
+            return False
     
     def clear_backup(self, py_handle):
         """

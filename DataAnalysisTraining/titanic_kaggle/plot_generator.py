@@ -17,6 +17,20 @@ class PlotGenerator(object):
         Constructor
         '''
         pass
-    
-    def test(self, df):
-        return sns.factorplot('Sex', data=df, kind='count')
+        
+    def factorplot(self, df, column):
+        """
+        TODO
+        """
+        if len(column) > 1:
+            return
+        return sns.factorplot(column[0], data=df, kind='count')
+
+    def factorplot_hue(self, df, columns):
+        """
+        TODO
+        """
+        if not len(columns) == 2:
+            return
+        return sns.factorplot(columns[0], hue=columns[1], data=df,
+                              kind='count')

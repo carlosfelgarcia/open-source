@@ -32,7 +32,8 @@ class MainWindow(qg.QMainWindow):
         Constructor
         '''
         # Variables
-        self.file_actions = []
+        self._actions = []
+        self._menus = []
         
         # Main Window
         qg.QMainWindow.__init__(self)
@@ -46,12 +47,34 @@ class MainWindow(qg.QMainWindow):
         menu_bar = self.menuBar()
         file_menu = menu_bar.addMenu("&File")
         
-        # Add file actions
-        self.add_file_actions()
-        for action in self.file_actions:
-            file_menu.addAction(action)
+        # Add file actions & sub-menus
+        self._create_actions()
+        file_menu.addActions(self._actions)
+        self._add_sub_menus(file_menu)
+
+    def _add_sub_menus(self, file_menu):
         
-    def add_file_actions(self):
+        # ------------------- Load Data SubMenu Start -------------------------
+        # Add Menu
+        load_menu = qg.QMenu('&Load Data', self)
+        file_menu.insertMenu(self._actions[-1], load_menu)
+        
+        # Add Actions
+        action_file = qg.QAction("&Load Data From File", self)
+        action_file.setStatusTip("Load data from file")
+        
+        action_spider = qg.QAction("&Send Spider", self)
+        action_spider.setStatusTip("Send Spider and load data")
+        
+        load_menu.addAction(action_file)
+        load_menu.addAction(action_spider)
+        
+        # Connections
+        action_file.triggered.connect(self._load_file)
+        action_spider.triggered.connect(self._send_spider)
+        # ------------------- Load Data SubMenu End -------------------------
+    
+    def _create_actions(self):
         '''
         Added the file actions to a pre-existing list
         '''
@@ -60,49 +83,58 @@ class MainWindow(qg.QMainWindow):
         quit_action.setShortcut("Ctrl+Q")
         quit_action.setStatusTip("Quit the app")
         
-        open_action = qg.QAction("&Open File", self)
-        open_action.setShortcut("Ctrl+O")
-        open_action.setStatusTip("Open File")
-        
         save_action = qg.QAction("&Save DataFrame", self)
         save_action.setShortcut("Ctrl+s")
         save_action.setStatusTip("Save DataFrame to csv file")
         
         # Connections
-        open_action.triggered.connect(self._open_file)
         quit_action.triggered.connect(self._close_window)
         save_action.triggered.connect(self._save_df)
         
         # Add Actions to the list
-        self.file_actions.append(open_action)
-        self.file_actions.append(save_action)
-        self.file_actions.append(quit_action)
+        self._actions.append(save_action)
+        self._actions.append(quit_action)
         
     def _close_window(self):
         """
         TODO
         """
-        print 'close'
+        main_dialog = self.centralWidget()
+        msn = 'Are you sure you want to quit?'
+        ans = main_dialog.default_question(msn)
+        if ans:
+            sys.exit()
         
-    def _open_file(self):
+    def _load_file(self):
         """
         TODO
         """
-        print 'open'
+        main_dialog = self.centralWidget()
+        tittle = 'Choose the file you want to load'
+        file_path = str(qg.QFileDialog.getOpenFileName(self, tittle))
+        data = main_dialog.titanic.get_data_file(file_path)
+        main_dialog.set_table(data)
+        main_dialog.fill_columns()
+        
+    def _send_spider(self):
+        """
+        TODO
+        """
+        print 'Coming soon'
         
     def _save_df(self):
         """
         TODO
         """
-        title = 'Choose the path where you want to save the file'
+        tittle = 'Choose the path where you want to save the file'
         op = qg.QFileDialog.ReadOnly
         file_path = qg.QFileDialog.getSaveFileName(self,
-                                                   title,
+                                                   tittle,
                                                    filter='*.csv',
                                                    options=op)
         # Get the QDialog
         main_dialog = self.centralWidget()
-        main_dialog._titanic.save_df(str(file_path))
+        main_dialog.titanic.save_df(str(file_path))
 
 
 class MainDialog(qg.QDialog):
@@ -113,8 +145,7 @@ class MainDialog(qg.QDialog):
         qg.QDialog.__init__(self)
         
         # World instance
-        self._titanic = titanic
-        self._table = self._titanic.get_data_file('train.csv')
+        self.titanic = titanic
         
         self.setLayout(qg.QHBoxLayout())
         self.layout().setContentsMargins(5, 5, 5, 5)
@@ -181,8 +212,7 @@ class MainDialog(qg.QDialog):
         self._set_default_values()
         
         add_col_btn = qg.QPushButton('Add Column')
-        delete_column_btn = qg.QPushButton('Delete Column')
-        save_table_btn = qg.QPushButton('Save New Column(s)')
+        delete_column_btn = qg.QPushButton('Delete Column(s)')
         
         # Add widgets to column layout
         add_col_layout.addWidget(new_col_lb)
@@ -197,7 +227,6 @@ class MainDialog(qg.QDialog):
         add_col_layout.addWidget(self._txt_col_function)
         add_col_layout.addWidget(add_col_btn)
         add_col_layout.addWidget(delete_column_btn)
-        add_col_layout.addWidget(save_table_btn)
         
         # Plot Layout
         plot_widget = qg.QWidget()
@@ -210,10 +239,10 @@ class MainDialog(qg.QDialog):
         data_analysis_lb.setFont(font)
         
         self._plot_menu = qg.QComboBox()
-        self._plot_menu.addItems(self._titanic.get_plot_functions())
+        self._plot_menu.addItems(self.titanic.get_plot_functions())
         
-        column_names_lb = qg.QLabel('Column names, separated by comma.')
-        column_names_lb.setFont(font)
+        self._column_names_lb = qg.QLabel('Attributes: Column')
+        self._column_names_lb.setFont(font)
         self._txt_col_names = qg.QLineEdit()
         
         plot_btn = qg.QPushButton('Show Plot')
@@ -221,7 +250,7 @@ class MainDialog(qg.QDialog):
         # Add widgets to plot layout
         plot_layout.addWidget(data_analysis_lb)
         plot_layout.addWidget(self._plot_menu)
-        plot_layout.addWidget(column_names_lb)
+        plot_layout.addWidget(self._column_names_lb)
         plot_layout.addWidget(self._txt_col_names)
         plot_layout.addWidget(plot_btn)
         
@@ -237,24 +266,11 @@ class MainDialog(qg.QDialog):
         table_layout.setAlignment(qc.Qt.AlignTop)
         
         # Table widget
-        columns = sorted(self._table.keys())
         self._table_w = qg.QTableWidget()
-        pref_size = len(columns) * 106
-        resize = False
-        if pref_size < TABLE_SIZE:
-            self._table_w.setMinimumWidth(pref_size)
-        else:
-            resize = True
-            self._table_w.setMinimumWidth(TABLE_SIZE)
+        self._table_w.setMinimumWidth(TABLE_SIZE)
         
         self._table_w.setMinimumHeight(700)
         
-        # Fill table
-        self._fill_columns(columns)
-        
-        if resize:
-            self._table_w.resizeColumnsToContents()
-            self._table_w.resizeRowsToContents()
         table_layout.addWidget(self._table_w)
         
         # Added Main Layout
@@ -268,11 +284,46 @@ class MainDialog(qg.QDialog):
     
         # --------------------- Connections -----------------------------
         add_col_btn.clicked.connect(self.add_column)
+        delete_column_btn.clicked.connect(self.del_column)
         self._txt_col_function.selectionChanged.connect(self._clean_txt_field)
         self._txt_col_funct_name.editingFinished.connect(self._add_function_txt)
         plot_btn.clicked.connect(self.show_plot)
-        
+        # Used the other way to connect as I can get the text as parameter
+        self.connect(self._plot_menu,
+                     qc.SIGNAL('currentIndexChanged(QString)'),
+                     self._change_label)
+
     # ------------------ Class UI Methods ------------------------------
+    def _change_label(self, func_name):
+        """
+            TODO
+        """
+        label = self.titanic.get_plot_label(str(func_name))
+        self._column_names_lb.setText('Attributes: {0}'.format(label))
+    
+    def del_column(self):
+        """
+            TODO
+        """
+        # Get all the values
+        col_selected = self._table_w.selectedItems()
+        column_names = []
+        last_name = ''
+        for column_item in col_selected:
+            column_index = self._table_w.column(column_item)
+            item = self._table_w.horizontalHeaderItem(column_index)
+            column_name = str(item.text())
+            if column_name == last_name:
+                continue
+            last_name = column_name
+            column_names.append(column_name)
+
+        # Get new data frame
+        self._table = self.titanic.del_column(column_names)
+          
+        # reload table values
+        self.fill_columns()
+        
     def add_column(self):
         """
             TODO
@@ -301,7 +352,7 @@ class MainDialog(qg.QDialog):
             return
         
         # Add new function
-        function_added = self._titanic.add_new_fucntion(function_name, function)
+        function_added = self.titanic.add_new_fucntion(function_name, function)
         if function_added == -1:
             msn = 'Error: There are some Syntax errors in your function'
             self.default_warning(msn)
@@ -317,11 +368,11 @@ class MainDialog(qg.QDialog):
                 return
         
         # Add the column and get the updated data frame
-        self._table = self._titanic.add_new_column(new_col_name, col_name1,
+        self._table = self.titanic.add_new_column(new_col_name, col_name1,
                                                    col_name2, function_name)
         
         # reload table values
-        self._fill_columns()
+        self.fill_columns()
         
         # Set the UI back to default
         self._set_default_values()
@@ -396,7 +447,7 @@ class MainDialog(qg.QDialog):
             txt = "def %s():\n    " % function_name
             self._txt_col_function.setText(txt)
             
-    def _fill_columns(self, columns=None):
+    def fill_columns(self, columns=None):
         """
             TODO
         """
@@ -452,11 +503,17 @@ class MainDialog(qg.QDialog):
             self.default_warning("Some values don't match column name")
             return
         graph = str(self._plot_menu.currentText())
-        plot_graph = self._titanic.get_plot(values, graph)
+        plot_graph = self.titanic.get_plot(values, graph)
         if not plot_graph:
             self.default_warning("The values don't match the graph you want")
             return
         plot_graph.fig.show()
+        
+    def set_table(self, data):
+        """
+        TODO
+        """
+        self._table = data
     
 if __name__ == '__main__':
     # Main Class instance

@@ -35,10 +35,12 @@ class MainTitanic(object):
         if os.path.exists(path):
             _, ext = os.path.splitext(path)
             handle = self._factory.get_class(ext)()
+            if not handle:
+                return
             file_data = handle.read_file(path)
             self._data_analysis = data_analysis.DataAnalysis(file_data)
             
-        return self._data_analysis.get_data_frame_list()
+        return self._data_analysis.get_data_frame()
     
     def add_new_fucntion(self, name, function):
         """
@@ -48,8 +50,8 @@ class MainTitanic(object):
         if name in self._data_analysis.get_function_list():
             return 0
         self._current_py_handle = self._factory.get_class('.py')()
-        if self._data_analysis.add_function(name, function,
-                                            self._current_py_handle):
+        if not self._data_analysis.add_function(name, function,
+                                                self._current_py_handle):
             return -1
         return 1
     
@@ -65,12 +67,11 @@ class MainTitanic(object):
                 self._data_analysis.clear_backup(self._current_py_handle)
                 self._current_py_handle = None
          
-        except Exception, e:
+        except Exception as e:
             if self._current_py_handle:
-                self._data_analysis.rollback_backup(self._current_py_handle)
                 self._data_analysis.clear_backup(self._current_py_handle)
                 self._current_py_handle = None
-            raise e
+            raise
         
         return self._data_analysis.get_data_frame_list()
     
@@ -78,7 +79,11 @@ class MainTitanic(object):
         """
         TODO
         """
-        return [fun for fun in self._plot_func_list if not fun.startswith('_')]
+        func_list = []
+        for fun in self._plot_func_list:
+            if not (fun.startswith('_') or fun.startswith('get')):
+                func_list.append(fun)
+        return func_list
     
     def get_plot(self, values, graph, df=None):
         """
@@ -104,3 +109,14 @@ class MainTitanic(object):
             return
         handle.write_file(file_path, df)
         
+    def del_column(self, column_names):
+        """
+        TODO
+        """
+        return self._data_analysis.del_column(column_names)
+    
+    def get_plot_label(self, func_name):
+        """
+        TODO
+        """
+        return self._plot_generator.get_label(func_name)

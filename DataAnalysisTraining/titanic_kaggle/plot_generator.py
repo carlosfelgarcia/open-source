@@ -16,8 +16,15 @@ class PlotGenerator(object):
         '''
         Constructor
         '''
-        pass
-        
+        self._labels = {'factorplot': 'Column',
+                        'factorplot_hue': 'Column, Hue'}
+    
+    def get_label(self, func_name):
+        """
+        TODO
+        """
+        return self._labels[func_name]
+    
     def factorplot(self, df, column):
         """
         TODO

@@ -17,7 +17,8 @@ class DataFactory(object):
         '''
         Constructor
         '''
-        self._class_list = {'.csv': csv_handle.CSVHandle, '.py': python_handle.PythonHandle}
+        self._class_list = {'.csv': csv_handle.CSVHandle,
+                            '.py': python_handle.PythonHandle}
         
     def get_class(self, data_type):
         return self._class_list[data_type]

@@ -32,12 +32,6 @@ class DataAnalysis(object):
         """
         return self._data_frame
     
-    def get_data_frame_list(self):
-        """
-        TODO
-        """
-        return self._data_frame.to_dict('list')
-    
     def add_function(self, name, function, py_handle):
         """
         TODO
@@ -77,4 +71,11 @@ class DataAnalysis(object):
         new_column = self._data_frame[[col1_name, col2_name]].apply(function,
                                                                     axis=1)
         self._data_frame[new_col_name] = new_column
+        return self._data_frame
+    
+    def del_column(self, column_names):
+        """
+        TODO
+        """
+        self._data_frame = self._data_frame.drop(column_names, axis=1)
         return self._data_frame

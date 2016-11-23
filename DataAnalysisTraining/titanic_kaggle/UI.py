@@ -20,7 +20,7 @@ from bokeh.layouts import column
 
 # Constants
 TABLE_SIZE = 700
-
+INFO = ['Mean', 'Value Count']
 
 class MainWindow(qg.QMainWindow):
     '''
@@ -166,17 +166,17 @@ class MainDialog(qg.QDialog):
         # ---------------- Left Side UI --------------------------
         main_left_layout = qg.QVBoxLayout()
         main_left_layout.setContentsMargins(5, 5, 5, 5)
-        main_left_layout.setSpacing(20)
+        main_left_layout.setSpacing(10)
         
-        add_col_widget = qg.QWidget()
-        add_col_widget.setFixedHeight(500)
-        add_col_widget.setFixedWidth(450)
+        # ---------------------- Add column ----------------------
+        col_widget = qg.QWidget()
+        col_widget.setFixedHeight(400)
+        col_widget.setFixedWidth(450)
         add_col_layout = qg.QVBoxLayout()
-        add_col_widget.setLayout(add_col_layout)
-        add_col_widget.layout().setAlignment(qc.Qt.AlignTop)
-        add_col_widget.layout().setSpacing(10)
-        
-        # Add column widgets
+        col_widget.setLayout(add_col_layout)
+        col_widget.layout().setAlignment(qc.Qt.AlignTop)
+        col_widget.layout().setSpacing(10)
+
         # Font
         font = qg.QFont()
         font.setBold(True)
@@ -185,16 +185,15 @@ class MainDialog(qg.QDialog):
         
         new_col_lb = qg.QLabel('Add new Column')
         new_col_lb.setFont(font)
+        new_col_lb.setAlignment(qc.Qt.AlignHCenter)
+        new_col_name_lb = qg.QLabel('New column name')
+        new_col_name_lb.setFont(font)
         self._txt_new_col_name = qg.QLineEdit()
         self._txt_new_col_name.setMinimumWidth(400)
         
-        col_name1_lb = qg.QLabel('Column 1 Name')
-        col_name1_lb.setFont(font)
-        self._txt_col_name1 = qg.QLineEdit()
-        
-        col_name2_lb = qg.QLabel('Column 2 Name')
-        col_name2_lb.setFont(font)
-        self._txt_col_name2 = qg.QLineEdit()
+        cols_names_lb = qg.QLabel('Columns')
+        cols_names_lb.setFont(font)
+        self._txt_cols_names = qg.QLineEdit()
         
         col_funct_name_lb = qg.QLabel('Fuction name')
         col_funct_name_lb.setFont(font)
@@ -216,11 +215,10 @@ class MainDialog(qg.QDialog):
         
         # Add widgets to column layout
         add_col_layout.addWidget(new_col_lb)
+        add_col_layout.addWidget(new_col_name_lb)
         add_col_layout.addWidget(self._txt_new_col_name)
-        add_col_layout.addWidget(col_name1_lb)
-        add_col_layout.addWidget(self._txt_col_name1)
-        add_col_layout.addWidget(col_name2_lb)
-        add_col_layout.addWidget(self._txt_col_name2)
+        add_col_layout.addWidget(cols_names_lb)
+        add_col_layout.addWidget(self._txt_cols_names)
         add_col_layout.addWidget(col_funct_name_lb)
         add_col_layout.addWidget(self._txt_col_funct_name)
         add_col_layout.addWidget(col_function_lb)
@@ -228,7 +226,7 @@ class MainDialog(qg.QDialog):
         add_col_layout.addWidget(add_col_btn)
         add_col_layout.addWidget(delete_column_btn)
         
-        # Plot Layout
+        # -------------------- Plot Layout ----------------------------
         plot_widget = qg.QWidget()
         plot_layout = qg.QVBoxLayout()
         plot_widget.setLayout(plot_layout)
@@ -237,6 +235,9 @@ class MainDialog(qg.QDialog):
         
         data_analysis_lb = qg.QLabel('Data Analysis')
         data_analysis_lb.setFont(font)
+        data_analysis_lb.setAlignment(qc.Qt.AlignHCenter)
+        plot_type_lb = qg.QLabel('Plot type')
+        plot_type_lb.setFont(font)
         
         self._plot_menu = qg.QComboBox()
         self._plot_menu.addItems(self.titanic.get_plot_functions())
@@ -249,14 +250,48 @@ class MainDialog(qg.QDialog):
         
         # Add widgets to plot layout
         plot_layout.addWidget(data_analysis_lb)
+        plot_layout.addWidget(plot_type_lb)
         plot_layout.addWidget(self._plot_menu)
         plot_layout.addWidget(self._column_names_lb)
         plot_layout.addWidget(self._txt_col_names)
         plot_layout.addWidget(plot_btn)
         
+        # -------------------- Additional info -----------------------
+        info_widget = qg.QWidget()
+        info_layout = qg.QVBoxLayout()
+        info_widget.setLayout(info_layout)
+        info_layout.setSpacing(4)
+        info_layout.setAlignment(qc.Qt.AlignTop)
+        
+        add_info_lb = qg.QLabel('Additional Information')
+        add_info_lb.setFont(font)
+        add_info_lb.setAlignment(qc.Qt.AlignHCenter)
+        
+        font_disclaimer = qg.QFont()
+        font_disclaimer.setPixelSize(12)
+        
+        disclaimer_lb = qg.QLabel('Select the column you want to get the '
+                                  'information from')
+        disclaimer_lb.setFont(font_disclaimer)
+        
+        info_type_lb = qg.QLabel('Request Info')
+        info_type_lb.setFont(font)
+        
+        self._info_menu = qg.QComboBox()
+        self._info_menu.addItems(INFO)
+        
+        info_btn = qg.QPushButton('Get Information')
+        
+        info_layout.addWidget(add_info_lb)
+        info_layout.addWidget(disclaimer_lb)
+        info_layout.addWidget(info_type_lb)
+        info_layout.addWidget(self._info_menu)
+        info_layout.addWidget(info_btn)
+        
         # Add main widgets
-        main_left_layout.addWidget(add_col_widget)
+        main_left_layout.addWidget(col_widget)
         main_left_layout.addWidget(plot_widget)
+        main_left_layout.addWidget(info_widget)
 
         # ---------------- Right Side UI --------------------------
         
@@ -268,8 +303,7 @@ class MainDialog(qg.QDialog):
         # Table widget
         self._table_w = qg.QTableWidget()
         self._table_w.setMinimumWidth(TABLE_SIZE)
-        
-        self._table_w.setMinimumHeight(700)
+        self._table_w.setMinimumHeight(TABLE_SIZE)
         
         table_layout.addWidget(self._table_w)
         
@@ -330,27 +364,22 @@ class MainDialog(qg.QDialog):
         """
         # Get all the values
         new_col_name = str(self._txt_new_col_name.text())
-        col_name1 = str(self._txt_col_name1.text())
-        col_name2 = str(self._txt_col_name2.text())
+        cols_names = str(self._txt_cols_names.text())
         function_name = str(self._txt_col_funct_name.text())
         function = str(self._txt_col_function.toPlainText())
         
         # Check if all the values are filled
-        if not self._check_fields([new_col_name, col_name1, col_name2,
+        if not self._check_fields([new_col_name, cols_names,
                                    function_name, function]):
             return
         
         # Check the columns existence
         current_columns = self._table.keys()
-        if col_name1 not in current_columns:
-            self.default_warning('The column 1 does not exist, please check '
-                                 'the name and try again')
+        if cols_names not in current_columns:
+            self.default_warning('One of the columns does not exist, please '
+                                 'check the names and try again')
             return
-        if col_name2 not in current_columns:
-            self.default_warning('The column 2 does not exist, please check '
-                                 'the name and try again')
-            return
-        
+
         # Add new function
         function_added = self.titanic.add_new_fucntion(function_name, function)
         if function_added == -1:
@@ -368,8 +397,8 @@ class MainDialog(qg.QDialog):
                 return
         
         # Add the column and get the updated data frame
-        self._table = self.titanic.add_new_column(new_col_name, col_name1,
-                                                   col_name2, function_name)
+        self._table = self.titanic.add_new_column(new_col_name, cols_names,
+                                                  function_name)
         
         # reload table values
         self.fill_columns()
@@ -413,20 +442,14 @@ class MainDialog(qg.QDialog):
         """
         self._txt_new_col_name.clear()
         self._txt_new_col_name.setPlaceholderText('Type New Column name')
-        self._txt_col_name1.clear()
-        self._txt_col_name1.setPlaceholderText('Type Column name')
-        self._txt_col_name2.clear()
-        self._txt_col_name2.setPlaceholderText('Type Column name')
+        self._txt_cols_names.clear()
+        self._txt_cols_names.setPlaceholderText('Type Columns names')
         self._txt_col_funct_name.clear()
         self._txt_col_funct_name.setPlaceholderText('Type Function Name')
         self._txt_col_function.setText('Type the function that relates'
                                        ' the columns, e.g...'
-                                       '\ndef male_female_child(passenger):\n'
-                                       '    age,sex = passenger\n'
-                                       '    if age < 16:\n'
-                                       '        return "child"\n'
-                                       '    else:\n'
-                                       '        return sex')
+                                       '\ndef funct_name(*Args):\n'
+                                       '    function...')
         self._clean_txt = 0
 
     def _clean_txt_field(self):

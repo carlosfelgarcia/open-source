@@ -295,8 +295,8 @@ class MainDialog(qg.QDialog):
         # ---------------- Right Side UI --------------------------
         
         # Tab Widget
-        tab_widget = qg.QTabWidget()
-        tab_widget.setTabPosition(0)
+        self._tab_widget = qg.QTabWidget()
+        self._tab_widget.setTabPosition(0)
         
         # Table Layout
         table_layout = qg.QHBoxLayout()
@@ -304,12 +304,12 @@ class MainDialog(qg.QDialog):
         table_layout.setAlignment(qc.Qt.AlignTop)
         
         # Table widget
-        self._table_w = qg.QTableWidget()
-        self._table_w.setMinimumWidth(TABLE_SIZE)
-        self._table_w.setMinimumHeight(TABLE_SIZE)
+        self._table_w1 = qg.QTableWidget()
+        self._table_w1.setMinimumWidth(TABLE_SIZE)
+        self._table_w1.setMinimumHeight(TABLE_SIZE)
         
-        tab_widget.addTab(self._table_w, 'Tables')
-        table_layout.addWidget(tab_widget)
+        self._tab_widget.addTab(self._table_w1, 'Table 1')
+        table_layout.addWidget(self._tab_widget)
         
         # Added Main Layout
         main_layout.addLayout(main_left_layout)
@@ -342,12 +342,12 @@ class MainDialog(qg.QDialog):
             TODO
         """
         # Get all the values
-        col_selected = self._table_w.selectedItems()
+        col_selected = self._table_w1.selectedItems()
         column_names = []
         last_name = ''
         for column_item in col_selected:
-            column_index = self._table_w.column(column_item)
-            item = self._table_w.horizontalHeaderItem(column_index)
+            column_index = self._table_w1.column(column_item)
+            item = self._table_w1.horizontalHeaderItem(column_index)
             column_name = str(item.text())
             if column_name == last_name:
                 continue
@@ -477,8 +477,8 @@ class MainDialog(qg.QDialog):
             TODO
         """
         # Clear table
-        self._table_w.setRowCount(0)
-        self._table_w.setColumnCount(0)
+        self._table_w1.setRowCount(0)
+        self._table_w1.setColumnCount(0)
         
         # Get columns
         if not columns:
@@ -486,11 +486,11 @@ class MainDialog(qg.QDialog):
             
         # Add values to the table
         for column in columns:
-            col_num = self._table_w.columnCount()
-            row_total_num = self._table_w.rowCount()
-            self._table_w.insertColumn(col_num)
+            col_num = self._table_w1.columnCount()
+            row_total_num = self._table_w1.rowCount()
+            self._table_w1.insertColumn(col_num)
             col_item = qg.QTableWidgetItem(column)
-            self._table_w.setHorizontalHeaderItem(col_num, col_item)
+            self._table_w1.setHorizontalHeaderItem(col_num, col_item)
             if isinstance(self._table[column], collections.Iterable):
                 for i in xrange(len(self._table[column])):
                     value = ''
@@ -505,15 +505,15 @@ class MainDialog(qg.QDialog):
                     table_item = qg.QTableWidgetItem(value)
                     
                     if i >= row_total_num:
-                        self._table_w.insertRow(i)
-                    self._table_w.setItem(i, col_num, table_item)
+                        self._table_w1.insertRow(i)
+                    self._table_w1.setItem(i, col_num, table_item)
             else:
-                self._table_w.insertRow(row_total_num)
+                self._table_w1.insertRow(row_total_num)
                 table_item = qg.QTableWidgetItem(self._table[column])
-                self._table_w.setItem(row_total_num, col_num, table_item)
+                self._table_w1.setItem(row_total_num, col_num, table_item)
                 
-        self._table_w.resizeColumnsToContents()
-        self._table_w.resizeRowsToContents()
+        self._table_w1.resizeColumnsToContents()
+        self._table_w1.resizeRowsToContents()
         
     def show_plot(self):
         """

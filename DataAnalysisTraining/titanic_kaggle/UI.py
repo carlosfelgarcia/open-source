@@ -151,9 +151,8 @@ class MainDialog(qg.QDialog):
         self.layout().setContentsMargins(5, 5, 5, 5)
         self.layout().setSpacing(2)
         
-        # Tab Widget
-        tab_widget = qg.QTabWidget()
-        tab_widget.setTabPosition(0)
+        main_widget = qg.QWidget()
+        #main_widget.setStyleSheet('QWidget {background-color : rgb(227, 227, 227);}')
         
         # Widget for tab1
         page1_widget = qg.QWidget()
@@ -295,6 +294,10 @@ class MainDialog(qg.QDialog):
 
         # ---------------- Right Side UI --------------------------
         
+        # Tab Widget
+        tab_widget = qg.QTabWidget()
+        tab_widget.setTabPosition(0)
+        
         # Table Layout
         table_layout = qg.QHBoxLayout()
         table_layout.setContentsMargins(5, 5, 5, 5)
@@ -305,16 +308,15 @@ class MainDialog(qg.QDialog):
         self._table_w.setMinimumWidth(TABLE_SIZE)
         self._table_w.setMinimumHeight(TABLE_SIZE)
         
-        table_layout.addWidget(self._table_w)
+        tab_widget.addTab(self._table_w, 'Tables')
+        table_layout.addWidget(tab_widget)
         
         # Added Main Layout
         main_layout.addLayout(main_left_layout)
         main_layout.addLayout(table_layout)
-        page1_widget.setLayout(main_layout)
+        main_widget.setLayout(main_layout)
         
-        tab_widget.addTab(page1_widget, 'Tables')
-        
-        self.layout().addWidget(tab_widget)
+        self.layout().addWidget(main_widget)
     
         # --------------------- Connections -----------------------------
         add_col_btn.clicked.connect(self.add_column)

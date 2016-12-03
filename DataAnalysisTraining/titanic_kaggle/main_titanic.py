@@ -55,14 +55,15 @@ class MainTitanic(object):
             return -1
         return 1
     
-    def add_new_column(self, new_col_name, col1_name, col2_name, fun_name):
+    def add_new_column(self, new_col_name, cols_names, fun_name):
         """
         TODO
         """
         # TODO Check for names of columns
         try:
-            self._data_analysis.add_new_column(new_col_name, col1_name,
-                                               col2_name, fun_name)
+            self._data_analysis.add_new_column(new_col_name,
+                                               cols_names,
+                                               fun_name)
             if self._current_py_handle:
                 self._data_analysis.clear_backup(self._current_py_handle)
                 self._current_py_handle = None
@@ -73,7 +74,7 @@ class MainTitanic(object):
                 self._current_py_handle = None
             raise
         
-        return self._data_analysis.get_data_frame_list()
+        return self._data_analysis.get_data_frame()
     
     def get_plot_functions(self):
         """
@@ -120,3 +121,9 @@ class MainTitanic(object):
         TODO
         """
         return self._plot_generator.get_label(func_name)
+    
+    def get_information(self, column_name, opperation):
+        """
+        TODO
+        """
+        return self._data_analysis.get_information(column_name, opperation)

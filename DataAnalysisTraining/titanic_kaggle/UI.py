@@ -151,11 +151,17 @@ class MainDialog(qg.QDialog):
         self.layout().setContentsMargins(5, 5, 5, 5)
         self.layout().setSpacing(2)
         
+        # Fonts
+        font = qg.QFont()
+        font.setBold(True)
+        font.setCapitalization(qg.QFont.Capitalize)
+        font.setPixelSize(12)
+        
+        font_disclaimer = qg.QFont()
+        font_disclaimer.setPixelSize(12)
+        
         main_widget = qg.QWidget()
         #main_widget.setStyleSheet('QWidget {background-color : rgb(227, 227, 227);}')
-        
-        # Widget for tab1
-        page1_widget = qg.QWidget()
         
         # Main Layout
         main_layout = qg.QHBoxLayout()
@@ -175,12 +181,6 @@ class MainDialog(qg.QDialog):
         col_widget.setLayout(add_col_layout)
         col_widget.layout().setAlignment(qc.Qt.AlignTop)
         col_widget.layout().setSpacing(10)
-
-        # Font
-        font = qg.QFont()
-        font.setBold(True)
-        font.setCapitalization(qg.QFont.Capitalize)
-        font.setPixelSize(12)
         
         new_col_lb = qg.QLabel('Add new Column')
         new_col_lb.setFont(font)
@@ -192,9 +192,11 @@ class MainDialog(qg.QDialog):
         
         cols_names_lb = qg.QLabel('Columns')
         cols_names_lb.setFont(font)
+        cols_dis_lb = qg.QLabel('Valid column names separated by commas')
+        cols_dis_lb.setFont(font_disclaimer)
         self._txt_cols_names = qg.QLineEdit()
         
-        col_funct_name_lb = qg.QLabel('Fuction name')
+        col_funct_name_lb = qg.QLabel('Function name')
         col_funct_name_lb.setFont(font)
         self._clean_txt = 0
         self._txt_col_funct_name = qg.QLineEdit()
@@ -217,6 +219,7 @@ class MainDialog(qg.QDialog):
         add_col_layout.addWidget(new_col_name_lb)
         add_col_layout.addWidget(self._txt_new_col_name)
         add_col_layout.addWidget(cols_names_lb)
+        add_col_layout.addWidget(cols_dis_lb)
         add_col_layout.addWidget(self._txt_cols_names)
         add_col_layout.addWidget(col_funct_name_lb)
         add_col_layout.addWidget(self._txt_col_funct_name)
@@ -266,9 +269,6 @@ class MainDialog(qg.QDialog):
         add_info_lb.setFont(font)
         add_info_lb.setAlignment(qc.Qt.AlignHCenter)
         
-        font_disclaimer = qg.QFont()
-        font_disclaimer.setPixelSize(12)
-        
         disclaimer_lb = qg.QLabel('Select the column you want to get the '
                                   'information from')
         disclaimer_lb.setFont(font_disclaimer)
@@ -299,9 +299,9 @@ class MainDialog(qg.QDialog):
         self._tab_widget.setTabPosition(0)
         
         # Table Layout
-        table_layout = qg.QHBoxLayout()
-        table_layout.setContentsMargins(5, 5, 5, 5)
-        table_layout.setAlignment(qc.Qt.AlignTop)
+        self._table_layout = qg.QHBoxLayout()
+        self._table_layout.setContentsMargins(5, 5, 5, 5)
+        self._table_layout.setAlignment(qc.Qt.AlignTop)
         
         # Table widget
         self._table_w1 = qg.QTableWidget()
@@ -309,11 +309,11 @@ class MainDialog(qg.QDialog):
         self._table_w1.setMinimumHeight(TABLE_SIZE)
         
         self._tab_widget.addTab(self._table_w1, 'Table 1')
-        table_layout.addWidget(self._tab_widget)
+        self._table_layout.addWidget(self._tab_widget)
         
         # Added Main Layout
         main_layout.addLayout(main_left_layout)
-        main_layout.addLayout(table_layout)
+        main_layout.addLayout(self._table_layout)
         main_widget.setLayout(main_layout)
         
         self.layout().addWidget(main_widget)
@@ -328,8 +328,49 @@ class MainDialog(qg.QDialog):
         self.connect(self._plot_menu,
                      qc.SIGNAL('currentIndexChanged(QString)'),
                      self._change_label)
+        info_btn.clicked.connect(self.show_info)
 
     # ------------------ Class UI Methods ------------------------------
+    def show_info(self):
+        """
+            TODO
+        """
+        # Get the values to make the request to the system
+        col_selected = self._table_w1.selectedItems()
+        if not col_selected:
+            msn = 'Please select the column to get the information from.'
+            self.default_warning(msn)
+            return
+        column_index = self._table_w1.column(col_selected[0])
+        item = self._table_w1.horizontalHeaderItem(column_index)
+        col_name = str(item.text())
+        
+        opperation = str(self._info_menu.currentText())
+        
+        # Get the information from the world
+        value = self.titanic.get_information(col_name, opperation)
+        if not value:
+            msn = 'Some values can not be converted to numeric'
+            self.default_warning(msn)
+            return
+        
+        # Custom dialog to show the information
+        self.info_dialog = qg.QDialog()
+        self.info_dialog.setWindowTitle('Data Analysis Information')
+        info_layout = qg.QVBoxLayout()
+        
+        info_lb = qg.QLabel('The "{0}" for column "{1}" is:'.format(opperation,
+                                                                    col_name))
+        info_txt = qg.QTextEdit()
+        info_txt.setPlainText(value)
+        info_txt.setReadOnly(True)
+        
+        info_layout.addWidget(info_lb)
+        info_layout.addWidget(info_txt)
+        
+        self.info_dialog.setLayout(info_layout)
+        self.info_dialog.show()
+    
     def _change_label(self, func_name):
         """
             TODO
@@ -343,6 +384,10 @@ class MainDialog(qg.QDialog):
         """
         # Get all the values
         col_selected = self._table_w1.selectedItems()
+        if not col_selected:
+            msn = 'Please select the columns you want to delete'
+            self.default_warning(msn)
+            return
         column_names = []
         last_name = ''
         for column_item in col_selected:
@@ -376,8 +421,9 @@ class MainDialog(qg.QDialog):
             return
         
         # Check the columns existence
-        current_columns = self._table.keys()
-        if cols_names not in current_columns:
+        df_columns = self._table.keys()
+        columns_list = [col_name.strip() for col_name in cols_names.split(',')]
+        if not any([name in df_columns for name in columns_list]):
             self.default_warning('One of the columns does not exist, please '
                                  'check the names and try again')
             return
@@ -399,7 +445,7 @@ class MainDialog(qg.QDialog):
                 return
         
         # Add the column and get the updated data frame
-        self._table = self.titanic.add_new_column(new_col_name, cols_names,
+        self._table = self.titanic.add_new_column(new_col_name, columns_list,
                                                   function_name)
         
         # reload table values
@@ -450,7 +496,7 @@ class MainDialog(qg.QDialog):
         self._txt_col_funct_name.setPlaceholderText('Type Function Name')
         self._txt_col_function.setText('Type the function that relates'
                                        ' the columns, e.g...'
-                                       '\ndef funct_name(*Args):\n'
+                                       '\ndef funct_name(*Columns):\n'
                                        '    function...')
         self._clean_txt = 0
 
@@ -539,6 +585,12 @@ class MainDialog(qg.QDialog):
         TODO
         """
         self._table = data
+        
+    def mousePressEvent(self, *args, **kwargs):
+        """
+        TODO
+        """
+        self._table_w1.clearSelection()
     
 if __name__ == '__main__':
     # Main Class instance

@@ -3,10 +3,6 @@ Created on Oct 13, 2016
 
 @author: Carlos Garcia
 '''
-
-def test(f='hello world'):
-    print f
-
 def male_female_child(passenger):
     # Take the Age and Sex
     age,sex = passenger
@@ -15,3 +11,4 @@ def male_female_child(passenger):
         return 'child'
     else:
         return sex
+

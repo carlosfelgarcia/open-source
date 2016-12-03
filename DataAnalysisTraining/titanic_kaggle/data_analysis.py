@@ -63,13 +63,12 @@ class DataAnalysis(object):
         """
         return self._function_list
     
-    def add_new_column(self, new_col_name, col1_name, col2_name, fun_name):
+    def add_new_column(self, new_col_name, cols_names, fun_name):
         """
         TODO
         """
         function = getattr(data_functions, fun_name)
-        new_column = self._data_frame[[col1_name, col2_name]].apply(function,
-                                                                    axis=1)
+        new_column = self._data_frame[cols_names].apply(function, axis=1)
         self._data_frame[new_col_name] = new_column
         return self._data_frame
     
@@ -79,3 +78,20 @@ class DataAnalysis(object):
         """
         self._data_frame = self._data_frame.drop(column_names, axis=1)
         return self._data_frame
+    
+    def get_information(self, column_name, opperation):
+        """
+        TODO
+        """
+        if opperation == 'Mean':
+            try:
+                return str(self._data_frame[column_name].mean())
+            except TypeError:
+                return
+        elif opperation == 'Value Count':
+            info = self._data_frame[column_name].value_counts().to_dict()
+            value = ''
+            for k, v in info.iteritems():
+                value += ': '.join((str(k), str(v)))
+                value += '\n'
+            return value

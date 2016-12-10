@@ -24,7 +24,7 @@ class MainTitanic(object):
         '''
         self._factory = data_factory.DataFactory()
         self._current_py_handle = None
-        self._data_analysis = None
+        self._data_analysis = data_analysis.DataAnalysis()
         self._plot_generator = plot_generator.PlotGenerator()
         self._plot_func_list = dir(self._plot_generator)
 
@@ -37,11 +37,18 @@ class MainTitanic(object):
             handle = self._factory.get_class(ext)()
             if not handle:
                 return
-            file_data = handle.read_file(path)
-            self._data_analysis = data_analysis.DataAnalysis(file_data)
+            data_frame = handle.read_file(path)
+            self._data_analysis.add_data_frame(data_frame)
+            self._data_analysis.set_data_frame(-1)
             
-        return self._data_analysis.get_data_frame()
+        return data_frame
     
+    def set_current_data_frame(self, index):
+        """
+        TODO
+        """
+        self._data_analysis.set_data_frame(index)
+        
     def add_new_fucntion(self, name, function):
         """
             TODO
@@ -73,8 +80,6 @@ class MainTitanic(object):
                 self._data_analysis.clear_backup(self._current_py_handle)
                 self._current_py_handle = None
             raise
-        
-        return self._data_analysis.get_data_frame()
     
     def get_plot_functions(self):
         """
@@ -114,7 +119,7 @@ class MainTitanic(object):
         """
         TODO
         """
-        return self._data_analysis.del_column(column_names)
+        self._data_analysis.del_column(column_names)
     
     def get_plot_label(self, func_name):
         """
@@ -127,3 +132,10 @@ class MainTitanic(object):
         TODO
         """
         return self._data_analysis.get_information(column_name, opperation)
+    
+    def get_data_frame(self):
+        """
+        TODO
+        """
+        return self._data_analysis.get_data_frame()
+

@@ -12,19 +12,26 @@ class DataAnalysis(object):
     classdocs
     '''
 
-    def __init__(self, data_frame):
+    def __init__(self):
         '''
         Constructor
         '''
-        self._data_frame = data_frame
+        self._data_frame = None
         self._function_list = dir(data_functions)
         self._function_path = 'data_functions.py'
+        self._data_frame_list = []
         
-    def set_data_frame(self, data_frame):
+    def add_data_frame(self, data_frame):
         """
         TODO
         """
-        self._data_frame = data_frame
+        self._data_frame_list.append(data_frame)
+        
+    def set_data_frame(self, index):
+        """
+        TODO
+        """
+        self._data_frame = self._data_frame_list[index]
         
     def get_data_frame(self):
         """
@@ -68,16 +75,21 @@ class DataAnalysis(object):
         TODO
         """
         function = getattr(data_functions, fun_name)
-        new_column = self._data_frame[cols_names].apply(function, axis=1)
+        try:
+            list_p = []
+            new_column = self._data_frame[cols_names].apply(function,
+                                                            axis=1,
+                                                            args=(list_p,))
+        except TypeError:
+            new_column = self._data_frame[cols_names].apply(function,
+                                                            axis=1)
         self._data_frame[new_col_name] = new_column
-        return self._data_frame
     
     def del_column(self, column_names):
         """
         TODO
         """
         self._data_frame = self._data_frame.drop(column_names, axis=1)
-        return self._data_frame
     
     def get_information(self, column_name, opperation):
         """

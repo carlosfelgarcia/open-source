@@ -22,6 +22,7 @@ from bokeh.layouts import column
 TABLE_SIZE = 700
 INFO = ['Mean', 'Value Count']
 
+
 class MainWindow(qg.QMainWindow):
     '''
     MainWindow
@@ -112,9 +113,7 @@ class MainWindow(qg.QMainWindow):
         main_dialog = self.centralWidget()
         tittle = 'Choose the file you want to load'
         file_path = str(qg.QFileDialog.getOpenFileName(self, tittle))
-        data = main_dialog.titanic.get_data_file(file_path)
-        main_dialog.set_table(data)
-        main_dialog.fill_columns()
+        main_dialog.create_table_file(file_path)
         
     def _send_spider(self):
         """
@@ -147,6 +146,7 @@ class MainDialog(qg.QDialog):
         # World instance
         self.titanic = titanic
         
+        self._loaded = False
         self.setLayout(qg.QHBoxLayout())
         self.layout().setContentsMargins(5, 5, 5, 5)
         self.layout().setSpacing(2)
@@ -180,7 +180,7 @@ class MainDialog(qg.QDialog):
         add_col_layout = qg.QVBoxLayout()
         col_widget.setLayout(add_col_layout)
         col_widget.layout().setAlignment(qc.Qt.AlignTop)
-        col_widget.layout().setSpacing(10)
+        col_widget.layout().setSpacing(5)
         
         new_col_lb = qg.QLabel('Add new Column')
         new_col_lb.setFont(font)
@@ -211,8 +211,8 @@ class MainDialog(qg.QDialog):
         # Set default values
         self._set_default_values()
         
-        add_col_btn = qg.QPushButton('Add Column')
-        delete_column_btn = qg.QPushButton('Delete Column(s)')
+        self._btn_add_col = qg.QPushButton('Add Column')
+        self._btn_delete_column = qg.QPushButton('Delete Column(s)')
         
         # Add widgets to column layout
         add_col_layout.addWidget(new_col_lb)
@@ -225,8 +225,8 @@ class MainDialog(qg.QDialog):
         add_col_layout.addWidget(self._txt_col_funct_name)
         add_col_layout.addWidget(col_function_lb)
         add_col_layout.addWidget(self._txt_col_function)
-        add_col_layout.addWidget(add_col_btn)
-        add_col_layout.addWidget(delete_column_btn)
+        add_col_layout.addWidget(self._btn_add_col)
+        add_col_layout.addWidget(self._btn_delete_column)
         
         # -------------------- Plot Layout ----------------------------
         plot_widget = qg.QWidget()
@@ -248,7 +248,7 @@ class MainDialog(qg.QDialog):
         self._column_names_lb.setFont(font)
         self._txt_col_names = qg.QLineEdit()
         
-        plot_btn = qg.QPushButton('Show Plot')
+        self._btn_plot = qg.QPushButton('Show Plot')
         
         # Add widgets to plot layout
         plot_layout.addWidget(data_analysis_lb)
@@ -256,7 +256,7 @@ class MainDialog(qg.QDialog):
         plot_layout.addWidget(self._plot_menu)
         plot_layout.addWidget(self._column_names_lb)
         plot_layout.addWidget(self._txt_col_names)
-        plot_layout.addWidget(plot_btn)
+        plot_layout.addWidget(self._btn_plot)
         
         # -------------------- Additional info -----------------------
         info_widget = qg.QWidget()
@@ -279,13 +279,13 @@ class MainDialog(qg.QDialog):
         self._info_menu = qg.QComboBox()
         self._info_menu.addItems(INFO)
         
-        info_btn = qg.QPushButton('Get Information')
+        self._btn_info = qg.QPushButton('Get Information')
         
         info_layout.addWidget(add_info_lb)
         info_layout.addWidget(disclaimer_lb)
         info_layout.addWidget(info_type_lb)
         info_layout.addWidget(self._info_menu)
-        info_layout.addWidget(info_btn)
+        info_layout.addWidget(self._btn_info)
         
         # Add main widgets
         main_left_layout.addWidget(col_widget)
@@ -304,12 +304,7 @@ class MainDialog(qg.QDialog):
         self._table_layout.setAlignment(qc.Qt.AlignTop)
         
         # Table widget
-        self._table_w1 = qg.QTableWidget()
-        self._table_w1.setMinimumWidth(TABLE_SIZE)
-        self._table_w1.setMinimumHeight(TABLE_SIZE)
-        
-        self._tab_widget.addTab(self._table_w1, 'Table 1')
-        self._table_layout.addWidget(self._tab_widget)
+        self.new_table_widget()
         
         # Added Main Layout
         main_layout.addLayout(main_left_layout)
@@ -317,32 +312,97 @@ class MainDialog(qg.QDialog):
         main_widget.setLayout(main_layout)
         
         self.layout().addWidget(main_widget)
+        
+        # Disable UI until a data frame is loaded
+        self.set_enable_ui(False)
     
         # --------------------- Connections -----------------------------
-        add_col_btn.clicked.connect(self.add_column)
-        delete_column_btn.clicked.connect(self.del_column)
+        self._btn_add_col.clicked.connect(self.add_column)
+        self._btn_delete_column.clicked.connect(self.del_column)
         self._txt_col_function.selectionChanged.connect(self._clean_txt_field)
         self._txt_col_funct_name.editingFinished.connect(self._add_function_txt)
-        plot_btn.clicked.connect(self.show_plot)
-        # Used the other way to connect as I can get the text as parameter
+        self._btn_plot.clicked.connect(self.show_plot)
+        self._btn_info.clicked.connect(self.show_info)
+        # Used the other way to connect as it use the parameters
         self.connect(self._plot_menu,
                      qc.SIGNAL('currentIndexChanged(QString)'),
                      self._change_label)
-        info_btn.clicked.connect(self.show_info)
+        
+        self.connect(self._tab_widget,
+                     qc.SIGNAL('currentChanged(int)'),
+                     self._change_data_frame)
 
     # ------------------ Class UI Methods ------------------------------
+    def _change_data_frame(self, index):
+        """
+        TODO
+        """
+        self.titanic.set_current_data_frame(index)
+    
+    def create_table_file(self, file_path):
+        """
+        TODO
+        """
+        self.titanic.get_data_file(file_path)
+        if not self._loaded:
+            self.fill_columns()
+            # Enable txt, menus and btn in the ui
+            self.set_enable_ui(True)
+            self._loaded = True
+        else:
+            msn = ('A table is already loaded, do you want to open it in a new'
+                   ' tab?')
+            q = self.default_question(msn, 'Yes', 'No, overwrite current tab')
+            # Yes = 0, No = 1
+            if q == 1:
+                self.fill_columns()
+            else:
+                self.new_table_widget()
+                self.fill_columns()
+        
+    def new_table_widget(self):
+        """
+        TODO
+        """
+        table_widget = qg.QTableWidget()
+        table_widget.setMinimumWidth(TABLE_SIZE)
+        table_widget.setMinimumHeight(TABLE_SIZE)
+        tab_name = 'Table {0}'.format(self._tab_widget.currentIndex() + 2)
+        self._tab_widget.addTab(table_widget, tab_name)
+        self._tab_widget.setCurrentIndex(self._tab_widget.currentIndex() + 1)
+        self._table_layout.addWidget(self._tab_widget)
+    
+    def set_enable_ui(self, option=True):
+        """
+        TODO
+        """
+        self._txt_col_funct_name.setEnabled(option)
+        self._txt_col_function.setEnabled(option)
+        self._txt_col_names.setEnabled(option)
+        self._txt_cols_names.setEnabled(option)
+        self._txt_new_col_name.setEnabled(option)
+        self._btn_add_col.setEnabled(option)
+        self._btn_delete_column.setEnabled(option)
+        self._btn_info.setEnabled(option)
+        self._btn_plot.setEnabled(option)
+        self._info_menu.setEnabled(option)
+        self._plot_menu.setEnabled(option)
+    
     def show_info(self):
         """
             TODO
         """
+        # Get current table
+        table_widget = self._tab_widget.currentWidget()
+        
         # Get the values to make the request to the system
-        col_selected = self._table_w1.selectedItems()
+        col_selected = table_widget.selectedItems()
         if not col_selected:
             msn = 'Please select the column to get the information from.'
             self.default_warning(msn)
             return
-        column_index = self._table_w1.column(col_selected[0])
-        item = self._table_w1.horizontalHeaderItem(column_index)
+        column_index = table_widget.column(col_selected[0])
+        item = table_widget.horizontalHeaderItem(column_index)
         col_name = str(item.text())
         
         opperation = str(self._info_menu.currentText())
@@ -382,8 +442,11 @@ class MainDialog(qg.QDialog):
         """
             TODO
         """
+        # Get current table
+        table_widget = self._tab_widget.currentWidget()
+        
         # Get all the values
-        col_selected = self._table_w1.selectedItems()
+        col_selected = table_widget.selectedItems()
         if not col_selected:
             msn = 'Please select the columns you want to delete'
             self.default_warning(msn)
@@ -391,16 +454,16 @@ class MainDialog(qg.QDialog):
         column_names = []
         last_name = ''
         for column_item in col_selected:
-            column_index = self._table_w1.column(column_item)
-            item = self._table_w1.horizontalHeaderItem(column_index)
+            column_index = table_widget.column(column_item)
+            item = table_widget.horizontalHeaderItem(column_index)
             column_name = str(item.text())
             if column_name == last_name:
                 continue
             last_name = column_name
             column_names.append(column_name)
 
-        # Get new data frame
-        self._table = self.titanic.del_column(column_names)
+        # Delete column
+        self.titanic.del_column(column_names)
           
         # reload table values
         self.fill_columns()
@@ -421,7 +484,8 @@ class MainDialog(qg.QDialog):
             return
         
         # Check the columns existence
-        df_columns = self._table.keys()
+        current_data = titanic.get_data_frame()
+        df_columns = current_data.keys()
         columns_list = [col_name.strip() for col_name in cols_names.split(',')]
         if not any([name in df_columns for name in columns_list]):
             self.default_warning('One of the columns does not exist, please '
@@ -445,8 +509,8 @@ class MainDialog(qg.QDialog):
                 return
         
         # Add the column and get the updated data frame
-        self._table = self.titanic.add_new_column(new_col_name, columns_list,
-                                                  function_name)
+        self.titanic.add_new_column(new_col_name, columns_list,
+                                    function_name)
         
         # reload table values
         self.fill_columns()
@@ -518,59 +582,63 @@ class MainDialog(qg.QDialog):
             txt = "def %s():\n    " % function_name
             self._txt_col_function.setText(txt)
             
-    def fill_columns(self, columns=None):
+    def fill_columns(self):
         """
             TODO
         """
+        # Get current table
+        table_widget = self._tab_widget.currentWidget()
+        
         # Clear table
-        self._table_w1.setRowCount(0)
-        self._table_w1.setColumnCount(0)
+        table_widget.setRowCount(0)
+        table_widget.setColumnCount(0)
         
         # Get columns
-        if not columns:
-            columns = sorted(self._table.keys())
+        current_data = titanic.get_data_frame()
+        columns = sorted(current_data.keys())
             
         # Add values to the table
         for column in columns:
-            col_num = self._table_w1.columnCount()
-            row_total_num = self._table_w1.rowCount()
-            self._table_w1.insertColumn(col_num)
+            col_num = table_widget.columnCount()
+            row_total_num = table_widget.rowCount()
+            table_widget.insertColumn(col_num)
             col_item = qg.QTableWidgetItem(column)
-            self._table_w1.setHorizontalHeaderItem(col_num, col_item)
-            if isinstance(self._table[column], collections.Iterable):
-                for i in xrange(len(self._table[column])):
+            table_widget.setHorizontalHeaderItem(col_num, col_item)
+            if isinstance(current_data[column], collections.Iterable):
+                for i in xrange(len(current_data[column])):
                     value = ''
                     if isinstance(value, np.float64):
-                        value = np.int(self._table[column][i])
+                        value = np.int(current_data[column][i])
 
                     elif isinstance(value, str):
-                        value = str(self._table[column][i])
+                        value = str(current_data[column][i])
                         if value == 'nan':
                             value = '---'
                     
                     table_item = qg.QTableWidgetItem(value)
                     
                     if i >= row_total_num:
-                        self._table_w1.insertRow(i)
-                    self._table_w1.setItem(i, col_num, table_item)
+                        table_widget.insertRow(i)
+                    table_widget.setItem(i, col_num, table_item)
             else:
-                self._table_w1.insertRow(row_total_num)
-                table_item = qg.QTableWidgetItem(self._table[column])
-                self._table_w1.setItem(row_total_num, col_num, table_item)
+                table_widget.insertRow(row_total_num)
+                table_item = qg.QTableWidgetItem(current_data[column])
+                table_widget.setItem(row_total_num, col_num, table_item)
                 
-        self._table_w1.resizeColumnsToContents()
-        self._table_w1.resizeRowsToContents()
+        table_widget.resizeColumnsToContents()
+        table_widget.resizeRowsToContents()
         
     def show_plot(self):
         """
         TODO
         """
+        current_data = titanic.get_data_frame()
         vals = str(self._txt_col_names.text())
         if not vals:
             self.default_warning('Please fill the values you want to analyze')
             return
         values = [val.strip() for val in vals.split(',')]
-        if any(map(lambda v: v not in self._table.keys(), values)):
+        if any(map(lambda v: v not in current_data.keys(), values)):
             self.default_warning("Some values don't match column name")
             return
         graph = str(self._plot_menu.currentText())
@@ -579,18 +647,14 @@ class MainDialog(qg.QDialog):
             self.default_warning("The values don't match the graph you want")
             return
         plot_graph.fig.show()
-        
-    def set_table(self, data):
-        """
-        TODO
-        """
-        self._table = data
-        
+    
     def mousePressEvent(self, *args, **kwargs):
         """
         TODO
         """
-        self._table_w1.clearSelection()
+        # Get current table
+        table_widget = self._tab_widget.currentWidget()
+        table_widget.clearSelection()
     
 if __name__ == '__main__':
     # Main Class instance

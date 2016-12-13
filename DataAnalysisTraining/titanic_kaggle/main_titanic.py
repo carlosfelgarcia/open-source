@@ -30,7 +30,7 @@ class MainTitanic(object):
 
     def get_data_file(self, path):
         """
-            TODO
+        TODO
         """
         if os.path.exists(path):
             _, ext = os.path.splitext(path)
@@ -51,7 +51,7 @@ class MainTitanic(object):
         
     def add_new_fucntion(self, name, function):
         """
-            TODO
+        TODO
         """
         # Make sure is a new function
         if name in self._data_analysis.get_function_list():
@@ -60,26 +60,15 @@ class MainTitanic(object):
         if not self._data_analysis.add_function(name, function,
                                                 self._current_py_handle):
             return -1
+        self._data_analysis.delete_backup()
+        self._current_py_handle = None
         return 1
     
     def add_new_column(self, new_col_name, cols_names, fun_name):
         """
         TODO
         """
-        # TODO Check for names of columns
-        try:
-            self._data_analysis.add_new_column(new_col_name,
-                                               cols_names,
-                                               fun_name)
-            if self._current_py_handle:
-                self._data_analysis.clear_backup(self._current_py_handle)
-                self._current_py_handle = None
-         
-        except Exception as e:
-            if self._current_py_handle:
-                self._data_analysis.clear_backup(self._current_py_handle)
-                self._current_py_handle = None
-            raise
+        self._data_analysis.add_new_column(new_col_name, cols_names, fun_name)
     
     def get_plot_functions(self):
         """

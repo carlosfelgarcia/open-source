@@ -54,7 +54,12 @@ class MainWindow(qg.QMainWindow):
         self._add_sub_menus(file_menu)
 
     def _add_sub_menus(self, file_menu):
+        """
+        This method add the needed sub menus.
         
+        Args:
+            file_menu: the main menu for files.
+        """
         # ------------------- Load Data SubMenu Start -------------------------
         # Add Menu
         load_menu = qg.QMenu('&Load Data', self)
@@ -77,7 +82,8 @@ class MainWindow(qg.QMainWindow):
     
     def _create_actions(self):
         '''
-        Added the file actions to a pre-existing list
+        This method create and add actions on the menu file to a pre-existing
+        list.
         '''
         # Menu actions
         quit_action = qg.QAction("&Quit", self)
@@ -98,7 +104,7 @@ class MainWindow(qg.QMainWindow):
         
     def _close_window(self):
         """
-        TODO
+        This method close the main window.
         """
         main_dialog = self.centralWidget()
         msn = 'Are you sure you want to quit?'
@@ -108,7 +114,8 @@ class MainWindow(qg.QMainWindow):
         
     def _load_file(self):
         """
-        TODO
+        This method open a window to choose the file and trigger the creation
+        of a table.
         """
         main_dialog = self.centralWidget()
         tittle = 'Choose the file you want to load'
@@ -117,13 +124,15 @@ class MainWindow(qg.QMainWindow):
         
     def _send_spider(self):
         """
-        TODO
+        This method will be implement soon, but it will trigger a spider to
+        claw information from the web.
         """
         print 'Coming soon'
         
     def _save_df(self):
         """
-        TODO
+        This method open a window to choose where to save the file and trigger
+        the functions to save the data frame.
         """
         tittle = 'Choose the path where you want to save the file'
         op = qg.QFileDialog.ReadOnly
@@ -137,10 +146,13 @@ class MainWindow(qg.QMainWindow):
 
 
 class MainDialog(qg.QDialog):
-    '''
-    This is the main dialog
-    '''
+    """
+    This is the main dialog.
+    """
     def __init__(self, titanic):
+        """
+        Constructor
+        """
         qg.QDialog.__init__(self)
         
         # World instance
@@ -160,6 +172,7 @@ class MainDialog(qg.QDialog):
         font_disclaimer = qg.QFont()
         font_disclaimer.setPixelSize(12)
         
+        # Main Widget
         main_widget = qg.QWidget()
         #main_widget.setStyleSheet('QWidget {background-color : rgb(227, 227, 227);}')
         
@@ -335,13 +348,21 @@ class MainDialog(qg.QDialog):
     # ------------------ Class UI Methods ------------------------------
     def _change_data_frame(self, index):
         """
-        TODO
+        This method get trigger every time the table tab change.
+        
+        Args:
+            index: It is the index of the tab table.
         """
         self.titanic.set_current_data_frame(index)
     
     def create_table_file(self, file_path):
         """
-        TODO
+        This method check if a table is already loaded, if there is a loaded
+        table, it asked if the user want to overwrite the table or create a new
+        tab.
+        
+        Args:
+            file_path: is the file path of the new table to be loaded.
         """
         self.titanic.get_data_file(file_path)
         if not self._loaded:
@@ -361,9 +382,7 @@ class MainDialog(qg.QDialog):
                 self.fill_columns()
         
     def new_table_widget(self):
-        """
-        TODO
-        """
+        """It creates a new table widget in a new tab."""
         table_widget = qg.QTableWidget()
         table_widget.setMinimumWidth(TABLE_SIZE)
         table_widget.setMinimumHeight(TABLE_SIZE)
@@ -374,7 +393,10 @@ class MainDialog(qg.QDialog):
     
     def set_enable_ui(self, option=True):
         """
-        TODO
+        This method will enable the available functions on the table.
+        
+        Kwargs:
+            option: It allow to enable or disable the controls.
         """
         self._txt_col_funct_name.setEnabled(option)
         self._txt_col_function.setEnabled(option)
@@ -390,7 +412,9 @@ class MainDialog(qg.QDialog):
     
     def show_info(self):
         """
-            TODO
+        This method will check if a column is selected and trigger the
+        operation selected by the user, then it grabs the result and create
+        a new dialog to show it.
         """
         # Get current table
         table_widget = self._tab_widget.currentWidget()
@@ -433,14 +457,21 @@ class MainDialog(qg.QDialog):
     
     def _change_label(self, func_name):
         """
-            TODO
+        This method change the label that comes from the plot generator class,
+        to inform the user what are the required values to show the specific
+        graphic.
+        
+        Args:
+            func_name: the function/graph selected.
         """
         label = self.titanic.get_plot_label(str(func_name))
         self._column_names_lb.setText('Attributes: {0}'.format(label))
     
     def del_column(self):
         """
-            TODO
+        This method check if the columns to be deleted are selected and
+        triggers the deletion function. When fill_columns method is called,
+        it gets the updated values from the world.
         """
         # Get current table
         table_widget = self._tab_widget.currentWidget()
@@ -470,7 +501,9 @@ class MainDialog(qg.QDialog):
         
     def add_column(self):
         """
-            TODO
+        This method check the values needed to add the columns, it triggers the
+        check to the functions that was wrote by the user and then it triggers
+        the creation of the new column.
         """
         # Get all the values
         new_col_name = str(self._txt_new_col_name.text())
@@ -520,7 +553,10 @@ class MainDialog(qg.QDialog):
         
     def _check_fields(self, fields):
         """
-            TODO
+        This method check if the fields passed are filled.
+        
+        Args:
+            fields: The fields to be check
         """
         for value in fields:
             if value == '' or value is None:
@@ -531,7 +567,10 @@ class MainDialog(qg.QDialog):
     
     def default_warning(self, msn):
         """
-        TODO
+        This method show a default dialog whit a specific message.
+        
+        Args:
+            msn: The message to be shown.
         """
         qg.QMessageBox.warning(self, 'Titanic Data Analysis',
                                msn,
@@ -540,7 +579,10 @@ class MainDialog(qg.QDialog):
         
     def default_question(self, msn, btn1='No', btn2='Yes'):
         """
-        TODO
+        This method show a question dialog whit a specific message.
+        
+        Args:
+            msn: The message to be shown.
         """
         return qg.QMessageBox.question(self, 'Titanic Data Analysis',
                                        msn,
@@ -549,9 +591,7 @@ class MainDialog(qg.QDialog):
                                        defaultButtonNumber=0)
     
     def _set_default_values(self):
-        """
-            TODO
-        """
+        """This method restore the values of the all fields."""
         self._txt_new_col_name.clear()
         self._txt_new_col_name.setPlaceholderText('Type New Column name')
         self._txt_cols_names.clear()
@@ -566,7 +606,8 @@ class MainDialog(qg.QDialog):
 
     def _clean_txt_field(self):
         """
-            TODO
+        This method clean the text field where to allow the user to write the
+        new function.
         """
         if self._clean_txt == 0:
             self._clean_txt = 1
@@ -574,7 +615,7 @@ class MainDialog(qg.QDialog):
             
     def _add_function_txt(self):
         """
-            TODO
+        This method add the first line of the function, when a name is given.
         """
         if self._clean_txt == 0:
             self._clean_txt = 1
@@ -584,7 +625,8 @@ class MainDialog(qg.QDialog):
             
     def fill_columns(self):
         """
-            TODO
+        This method get the information from the current data frame and fill a
+        table by the columns.
         """
         # Get current table
         table_widget = self._tab_widget.currentWidget()
@@ -630,7 +672,8 @@ class MainDialog(qg.QDialog):
         
     def show_plot(self):
         """
-        TODO
+        This method check the values needed and show the selected graph. It
+        expect to get a FacetGrid from the world.
         """
         current_data = titanic.get_data_frame()
         vals = str(self._txt_col_names.text())
@@ -649,9 +692,7 @@ class MainDialog(qg.QDialog):
         plot_graph.fig.show()
     
     def mousePressEvent(self, *args, **kwargs):
-        """
-        TODO
-        """
+        """This method clear the selected columns."""
         # Get current table
         table_widget = self._tab_widget.currentWidget()
         table_widget.clearSelection()

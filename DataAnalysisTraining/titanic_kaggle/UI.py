@@ -364,7 +364,7 @@ class MainDialog(qg.QDialog):
         Args:
             file_path: is the file path of the new table to be loaded.
         """
-        self.titanic.get_data_file(file_path)
+        self.titanic.get_dataframe_file(file_path)
         if not self._loaded:
             self.fill_columns()
             # Enable txt, menus and btn in the ui

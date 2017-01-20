@@ -19,9 +19,7 @@ class MainTitanic(object):
     '''
 
     def __init__(self):
-        '''
-        Constructor
-        '''
+        '''Constructor'''
         self._factory = data_factory.DataFactory()
         self._current_py_handle = None
         self._data_analysis = data_analysis.DataAnalysis()

@@ -1,7 +1,7 @@
 '''
 Created on Oct 12, 2016
 
-@author: Carlos Garcia
+@author: Carlos Garcia - carlos@carlosgarcia.co
 '''
 # PyQt imports
 import PyQt4.QtCore as qc
@@ -15,8 +15,7 @@ import collections
 import numpy as np
 
 # Core imports
-import main_titanic
-from bokeh.layouts import column
+import main
 
 # Constants
 TABLE_SIZE = 700
@@ -142,21 +141,21 @@ class MainWindow(qg.QMainWindow):
                                                    options=op)
         # Get the QDialog
         main_dialog = self.centralWidget()
-        main_dialog.titanic.save_df(str(file_path))
+        main_dialog.main.save_df(str(file_path))
 
 
 class MainDialog(qg.QDialog):
     """
     This is the main dialog.
     """
-    def __init__(self, titanic):
+    def __init__(self, main):
         """
         Constructor
         """
         qg.QDialog.__init__(self)
         
         # World instance
-        self.titanic = titanic
+        self.main = main
         
         self._loaded = False
         self.setLayout(qg.QHBoxLayout())
@@ -174,7 +173,6 @@ class MainDialog(qg.QDialog):
         
         # Main Widget
         main_widget = qg.QWidget()
-        #main_widget.setStyleSheet('QWidget {background-color : rgb(227, 227, 227);}')
         
         # Main Layout
         main_layout = qg.QHBoxLayout()
@@ -255,7 +253,7 @@ class MainDialog(qg.QDialog):
         plot_type_lb.setFont(font)
         
         self._plot_menu = qg.QComboBox()
-        self._plot_menu.addItems(self.titanic.get_plot_functions())
+        self._plot_menu.addItems(self.main.get_plot_functions())
         
         self._column_names_lb = qg.QLabel('Attributes: Column')
         self._column_names_lb.setFont(font)
@@ -353,7 +351,7 @@ class MainDialog(qg.QDialog):
         Args:
             index: It is the index of the tab table.
         """
-        self.titanic.set_current_data_frame(index)
+        self.main.set_current_data_frame(index)
     
     def create_table_file(self, file_path):
         """
@@ -364,7 +362,7 @@ class MainDialog(qg.QDialog):
         Args:
             file_path: is the file path of the new table to be loaded.
         """
-        self.titanic.get_data_file(file_path)
+        self.main.get_dataframe_file(file_path)
         if not self._loaded:
             self.fill_columns()
             # Enable txt, menus and btn in the ui
@@ -432,7 +430,7 @@ class MainDialog(qg.QDialog):
         opperation = str(self._info_menu.currentText())
         
         # Get the information from the world
-        value = self.titanic.get_information(col_name, opperation)
+        value = self.main.get_information(col_name, opperation)
         if not value:
             msn = 'Some values can not be converted to numeric'
             self.default_warning(msn)
@@ -464,7 +462,7 @@ class MainDialog(qg.QDialog):
         Args:
             func_name: the function/graph selected.
         """
-        label = self.titanic.get_plot_label(str(func_name))
+        label = self.main.get_plot_label(str(func_name))
         self._column_names_lb.setText('Attributes: {0}'.format(label))
     
     def del_column(self):
@@ -494,7 +492,7 @@ class MainDialog(qg.QDialog):
             column_names.append(column_name)
 
         # Delete column
-        self.titanic.del_column(column_names)
+        self.main.del_column(column_names)
           
         # reload table values
         self.fill_columns()
@@ -517,7 +515,7 @@ class MainDialog(qg.QDialog):
             return
         
         # Check the columns existence
-        current_data = titanic.get_data_frame()
+        current_data = self.main.get_data_frame()
         df_columns = current_data.keys()
         columns_list = [col_name.strip() for col_name in cols_names.split(',')]
         if not any([name in df_columns for name in columns_list]):
@@ -526,7 +524,7 @@ class MainDialog(qg.QDialog):
             return
 
         # Add new function
-        function_added = self.titanic.add_new_fucntion(function_name, function)
+        function_added = self.main.add_new_fucntion(function_name, function)
         if function_added == -1:
             msn = 'Error: There are some Syntax errors in your function'
             self.default_warning(msn)
@@ -542,8 +540,8 @@ class MainDialog(qg.QDialog):
                 return
         
         # Add the column and get the updated data frame
-        self.titanic.add_new_column(new_col_name, columns_list,
-                                    function_name)
+        self.main.add_new_column(new_col_name, columns_list,
+                                 function_name)
         
         # reload table values
         self.fill_columns()
@@ -572,7 +570,7 @@ class MainDialog(qg.QDialog):
         Args:
             msn: The message to be shown.
         """
-        qg.QMessageBox.warning(self, 'Titanic Data Analysis',
+        qg.QMessageBox.warning(self, 'main Data Analysis',
                                msn,
                                buttons=qg.QMessageBox.Ok,
                                defaultButton=qg.QMessageBox.NoButton)
@@ -584,7 +582,7 @@ class MainDialog(qg.QDialog):
         Args:
             msn: The message to be shown.
         """
-        return qg.QMessageBox.question(self, 'Titanic Data Analysis',
+        return qg.QMessageBox.question(self, 'main Data Analysis',
                                        msn,
                                        btn1,
                                        btn2,
@@ -636,7 +634,7 @@ class MainDialog(qg.QDialog):
         table_widget.setColumnCount(0)
         
         # Get columns
-        current_data = titanic.get_data_frame()
+        current_data = self.main.get_data_frame()
         columns = sorted(current_data.keys())
             
         # Add values to the table
@@ -675,7 +673,7 @@ class MainDialog(qg.QDialog):
         This method check the values needed and show the selected graph. It
         expect to get a FacetGrid from the world.
         """
-        current_data = titanic.get_data_frame()
+        current_data = self.main.get_data_frame()
         vals = str(self._txt_col_names.text())
         if not vals:
             self.default_warning('Please fill the values you want to analyze')
@@ -685,7 +683,7 @@ class MainDialog(qg.QDialog):
             self.default_warning("Some values don't match column name")
             return
         graph = str(self._plot_menu.currentText())
-        plot_graph = self.titanic.get_plot(values, graph)
+        plot_graph = self.main.get_plot(values, graph)
         if not plot_graph:
             self.default_warning("The values don't match the graph you want")
             return
@@ -699,12 +697,12 @@ class MainDialog(qg.QDialog):
     
 if __name__ == '__main__':
     # Main Class instance
-    titanic = main_titanic.MainTitanic()
+    main = main.Main()
     
     # UI
     app = qg.QApplication(sys.argv)
     main_ui = MainWindow()
-    dialog = MainDialog(titanic)
+    dialog = MainDialog(main)
     main_ui.setCentralWidget(dialog)
     main_ui.show()
     sys.exit(app.exec_())

@@ -1,7 +1,7 @@
 '''
 Created on Oct 18, 2016
 
-@author: User
+@author: Carlos Garcia - carlos@carlosgarcia.co
 '''
 
 # External Libraries Imports
@@ -13,7 +13,8 @@ from interface_data import DataInterface
 
 class CSVHandle(DataInterface):
     '''
-    classdocs
+    This class handle all the different operations for csv files, follow the
+    "DataInterface" interface.
     '''
 
     def __init__(self):
@@ -23,14 +24,20 @@ class CSVHandle(DataInterface):
         pass
 
     def read_file(self, path):
-        """
-        TODO
-        """
+        '''
+        It reads the csv file with pandas library
+        :param path: The path to the file
+        :type path: str
+        '''
         return pd.read_csv(path)
 
     def write_file(self, path, content):
-        """
-        TODO
-        """
+        '''
+        It writes a csv file using pandas
+        :param path: The path where the file is going to be save
+        :type path: str
+        :param content: The content of the csv file
+        :type content: pandas.DataFrame
+        '''
         if isinstance(content, pd.DataFrame):
             content.to_csv(path, index=False)

@@ -1,7 +1,7 @@
 '''
 Created on Oct 13, 2016
 
-@author: Carlos Garcia
+@author: Carlos Garcia - carlos@carlosgarcia.co
 '''
 
 
